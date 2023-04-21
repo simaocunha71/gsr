@@ -15,4 +15,5 @@ Relatório Overleaf: https://www.overleaf.com/project/64392ff091ff419dc81f0ab8
 * *model/*: Modelo SNMPkeyShare
 * *generation_management/*: Geração e manutenção das chaves
 * *comunication/*: Comunicação SNMPkeyShare
+* *MIB/*: MIB SNMPkeyShare
 * *docs/*: Documentos necessários para o TP (enunciado, ...)

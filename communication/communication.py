@@ -1,0 +1,1 @@
+"""Criação dos comandos get(), set() e response()"""
