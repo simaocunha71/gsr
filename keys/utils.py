@@ -1,15 +1,10 @@
-import sys
-import re
 import numpy as np
+import random
 
 def rotate(line,n_times):
     """Função que devolve uma linha obtida por rodar os elementos de line para a direita n_times"""
     return line[-n_times:] + line[:-n_times]
 
-#Teste da função rotate
-#line, n_times = "012345",1
-#line = rotate(line, n_times)
-#print(line)
 
 def transpose(line):
     """Função que dá a transposta de uma linha (em formato string ou em lista de listas de caracteres)"""
@@ -19,25 +14,37 @@ def transpose(line):
     else: #Assume-se que a linha é string
         return [[char] for char in line]
 
-#Testes da função transpose
-#line1 = "012345"
-#line1 = transpose(line1)
-#print(line1)
-#
-#line2 = [['0'], ['1'], ['2'], ['3'], ['4'], ['5']]
-#line2 = transpose(line2)
-#print(line2)
+def concat_ll(mat1,mat2):
+    """Função que concatena listas de listas numa só lista de listas"""
+    if not mat1 and not mat2:
+        return []
+    elif not mat1:
+        return mat2
+    elif not mat2:
+        return mat1
+    else:
+        result = []
+        for i in range(len(mat1)):
+            result.append(mat1[i] + mat2[i])
+        return result
+    
 
-def print_matrix(mat, legenda, key):
-    """Função que imprime uma matrix"""
+def print_matrix(mat, legenda, key=None):
+    """Função que imprime uma matriz"""
     print(legenda)
-    print(f"chave=\"{key}\"")
+    if key is not None:
+        print(f"sequencia=\"{key}\"")
     for i in range(len(mat)):
         for j in range(len(mat[0])):
             print(mat[i][j], end=" ")
         print()
     print()
 
+
+def create_random_number(min,max,seed):
+    """Função que cria um inteiro aleatorio com uma determinada seed no intervalo [min,max]"""
+    random.seed(seed) 
+    return random.randint(min, max) 
 
 """NOTE: Rascunho de funções - provavelmente nenhuma vai estar aqui"""
 
