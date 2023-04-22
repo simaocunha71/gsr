@@ -1,0 +1,1 @@
+"""Módulo de criação de chaves"""

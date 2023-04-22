@@ -5,7 +5,14 @@ print("######### Teste da função rotate #########")
 line, n_times = "012345",1
 line = utils.rotate(line, n_times)
 print("Esperado: " + "501234")
-print("Obtido: " + line)
+print("Obtido:   " + line)
+
+########################################################################
+print("######### Teste da função rotate_vertical #########")
+line, n_times = [['0'], ['1'], ['2'], ['3'], ['4'], ['5']],1
+line = utils.rotate_vertical(line, n_times)
+print("Esperado: " + "[['5'], ['0'], ['1'], ['2'], ['3'], ['4']]")
+print("Obtido:   " + str(line))
 
 ########################################################################
 print("######### Testes da função transpose #########")

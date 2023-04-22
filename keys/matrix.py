@@ -3,7 +3,6 @@ import sys
 sys.path.append('../')
 import model.configurations as configurations
 import utils
-import numpy as np
 
 def create_m1_m2(n,master_key):
     """Devolve m1 que contém os primeiros n bytes e m2 que contém os ultimos n bytes"""
@@ -52,22 +51,31 @@ def create_matrix_Zd(n, Zb):
     return Zd
 
 def create_matrix_Z(n,Za,Zb,Zc,Zd):
-    pass
+    """Devolve a matriz Z (de tamanho n) com recurso às matrizes Za, Zb, Zc e Zd"""
+    Z = []
+    for i in range(n):
+        row = []
+        for j in range(n):
+            row.append(utils.fm(Za[i][j], Zb[i][j], Zc[i][j], Zd[i][j]))
+        Z.append(row)
+    return Za #TODO: devolver Z em vez de Za (a corrigir quando corrigir fm)
 
+def get_matrix(n,master_key):
+    """Função principal deste módulo que devolve a matriz Z a partir do valor n e da master_key do ficheiro de configuração"""
+    m1,m2 = create_m1_m2(n, master_key)
+    Za = create_matrix_Za(n, m1)
+    Zb = create_matrix_Zb(n, m2)
+    Zc = create_matrix_Zc(n, Za)
+    Zd = create_matrix_Zd(n, Zb)
+    Z = create_matrix_Z(n, Za, Zb, Zc, Zd)
+
+    #utils.print_matrix(Za, "Matriz Za", m1)
+    #utils.print_matrix(Zb, "Matriz Zb", m2)
+    #utils.print_matrix(Zc, "Matriz Zc")
+    #utils.print_matrix(Zd, "Matriz Zd")
+    #utils.print_matrix(Z, "Matriz Z")
+    return Z
+
+#Eliminar este codigo quando a matriz Z tiver a implementação correta
 c = configurations.Configurations("../config.conf")
-m1,m2 = create_m1_m2(c.n_matrix, c.master_key)
-
-Za = create_matrix_Za(c.n_matrix, m1)
-utils.print_matrix(Za, "Matriz Za", m1)
-
-Zb = create_matrix_Zb(c.n_matrix, m2)
-utils.print_matrix(Zb, "Matriz Zb", m2)
-
-Zc = create_matrix_Zc(c.n_matrix, Za)
-utils.print_matrix(Zc, "Matriz Zc")
-
-Zd = create_matrix_Zd(c.n_matrix, Zb)
-utils.print_matrix(Zd, "Matriz Zd")
-
-Z = create_matrix_Z(c.n_matrix, Za, Zb, Zc, Zd)
-utils.print_matrix(Z, "Matriz Zd")
+get_matrix(c.n_matrix, c.master_key)

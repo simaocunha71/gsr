@@ -1,10 +1,15 @@
-import numpy as np
 import random
 
 def rotate(line,n_times):
     """Função que devolve uma linha obtida por rodar os elementos de line para a direita n_times"""
     return line[-n_times:] + line[:-n_times]
 
+def rotate_vertical(line_list,n_times):
+    """Função que devolve uma coluna obtida por rodar os elementos de line_list para a direita n_times"""
+    for _ in range(n_times):
+        last_item = line_list.pop()
+        line_list.insert(0, last_item)
+    return line_list
 
 def transpose(line):
     """Função que dá a transposta de uma linha (em formato string ou em lista de listas de caracteres)"""
@@ -28,7 +33,6 @@ def concat_ll(mat1,mat2):
             result.append(mat1[i] + mat2[i])
         return result
     
-
 def print_matrix(mat, legenda, key=None):
     """Função que imprime uma matriz"""
     print(legenda)
@@ -40,37 +44,12 @@ def print_matrix(mat, legenda, key=None):
         print()
     print()
 
-
 def create_random_number(min,max,seed):
     """Função que cria um inteiro aleatorio com uma determinada seed no intervalo [min,max]"""
     random.seed(seed) 
     return random.randint(min, max) 
 
-"""NOTE: Rascunho de funções - provavelmente nenhuma vai estar aqui"""
-
-def get_timestamp():
-    """ Manter um objeto de gestão que indique (em segundos) há quanto tempo o agente
-iniciou/reiniciou a sua execução (timespamp S); """
-    return "10 s"
-
-
-def generate_matrix():
-    """Usar a biblioteca numpy que cria matrizes a partir de strings e tem métodos para calcular transposta, etc"""
-    """Método a ser inserido em /generation_management"""
-    """incluir todos os caracteres ascii estendidos nas matrizes"""
-    """(colocar seed para geração de matriz aleatoria ou colocar matriz fm)"""
-    return np.matrix('1 2 3; 3 4 6; 7 8 9')
-
-
-def update_matrix(intervalo, matrix):
-    """Atualiza a matriz de "intervalo" em "intervalo" ms" """
-    """Método a ser inserido em /generation_management"""
-    print(intervalo)
-    print(matrix)
-    return np.matrix('1 2 3; 3 10 6; 7 8 9')
-
-
-def generate_key():
-    """Atender um pedido de geração duma chave enviado por uma aplicação e devolver o seu valor C e o seu identificador D; """
-    """Método a ser inserido em /generation_management"""
-    return "new key", "id"
+def fm(Za, Zb, Zc, Zd):
+    """Função que aplica a função fm a quatro valores inteiros"""
+    """TODO: Mudar a implementação desta função"""
+    return 0
