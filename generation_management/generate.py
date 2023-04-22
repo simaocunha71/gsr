@@ -1,1 +1,0 @@
-"""Gera matrizes e chaves e atualiza matrizes"""
