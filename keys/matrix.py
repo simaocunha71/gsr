@@ -56,9 +56,10 @@ def create_matrix_Z(n,Za,Zb,Zc,Zd):
     for i in range(n):
         row = []
         for j in range(n):
-            row.append(utils.fm(Za[i][j], Zb[i][j], Zc[i][j], Zd[i][j]))
+            row.append(str(int(Za[i][j]) ^ int(Zb[i][j]) ^ int(Zc[i][j]) ^ int(Zd[i][j])))
         Z.append(row)
-    return Za #TODO: devolver Z em vez de Za (a corrigir quando corrigir fm)
+    return Z
+
 
 def get_matrix(n,master_key):
     """Função principal deste módulo que devolve a matriz Z a partir do valor n e da master_key do ficheiro de configuração"""
@@ -77,5 +78,5 @@ def get_matrix(n,master_key):
     return Z
 
 #Eliminar este codigo quando a matriz Z tiver a implementação correta
-c = configurations.Configurations("../config.conf")
-get_matrix(c.n_matrix, c.master_key)
+#c = configurations.Configurations("../config.conf")
+#get_matrix(c.n_matrix, c.master_key)

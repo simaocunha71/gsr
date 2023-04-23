@@ -4,16 +4,12 @@ def rotate(line,n_times):
     """Função que devolve uma linha obtida por rodar os elementos de line para a direita n_times"""
     return line[-n_times:] + line[:-n_times]
 
-def rotate_vertical(line_list,n_times):
+def rotate_vertical(column,n_times):
     """Função que devolve uma coluna obtida por rodar os elementos de line_list para a direita n_times"""
-    for _ in range(n_times):
-        last_item = line_list.pop()
-        line_list.insert(0, last_item)
-    return line_list
+    return column[-n_times:] + column[:-n_times]
 
 def transpose(line):
     """Função que dá a transposta de uma linha (em formato string ou em lista de listas de caracteres)"""
-    """Adaptado de https://stackoverflow.com/questions/65759358/convert-a-python-list-of-lists-to-a-single-string (consultado em 22 abril 2023)"""
     if isinstance(line, list): #Linha é lista de listas de caracteres
         return "".join(["".join([str(item) for item in sublist]) for sublist in line])
     else: #Assume-se que a linha é string
@@ -47,9 +43,4 @@ def print_matrix(mat, legenda, key=None):
 def create_random_number(min,max,seed):
     """Função que cria um inteiro aleatorio com uma determinada seed no intervalo [min,max]"""
     random.seed(seed) 
-    return random.randint(min, max) 
-
-def fm(Za, Zb, Zc, Zd):
-    """Função que aplica a função fm a quatro valores inteiros"""
-    """TODO: Mudar a implementação desta função"""
-    return 0
+    return random.randint(min, max)

@@ -16,12 +16,12 @@ class Configurations:
         with open(filename, 'r') as f:
             f_lines = f.readlines()
         
-        self.n_matrix = int(self.get_value(''.join(f_lines), self.regex_n_matrix))          # Número de linhas ou colunas da matriz
-        self.master_key = self.get_value(''.join(f_lines), self.regex_master_key)           # Chave mestra
-        self.update_interval = self.get_value(''.join(f_lines), self.regex_update_interval) # Intervalo(em ms) de atualizações de matrizes
-        self.max_store_time = self.get_value(''.join(f_lines), self.regex_max_store_time)   # Tempo máximo do armazenamento da informação na matriz
-        self.n_max_entries = int(self.get_value(''.join(f_lines), self.regex_n_max_entries))# Número máximo de entradas na tabela
-        self.port = int(self.get_value(''.join(f_lines), self.regex_port))                  # Porta de atendimento UDP
+        self.n_matrix = int(self.get_value(''.join(f_lines), self.regex_n_matrix))               # Número de linhas ou colunas da matriz
+        self.master_key = self.get_value(''.join(f_lines), self.regex_master_key)                # Chave mestra
+        self.update_interval = int(self.get_value(''.join(f_lines), self.regex_update_interval)) # Intervalo(em ms) de atualizações de matrizes
+        self.max_store_time = self.get_value(''.join(f_lines), self.regex_max_store_time)        # Tempo máximo do armazenamento da informação na matriz
+        self.n_max_entries = int(self.get_value(''.join(f_lines), self.regex_n_max_entries))     # Número máximo de entradas na tabela
+        self.port = int(self.get_value(''.join(f_lines), self.regex_port))                       # Porta de atendimento UDP
 
         
     def get_value(self, file_content, regex):
@@ -37,3 +37,6 @@ class Configurations:
         print(f"V: {self.max_store_time}")
         print(f"X: {str(self.n_max_entries)}")
         print(f"Port: {str(self.port)}")
+
+#c = Configurations("../config.conf")
+#c.print_configurations()
