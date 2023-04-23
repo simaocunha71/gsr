@@ -17,15 +17,9 @@ def second_update_Z(n, Z):
 
 def update_matrix_Z(n, Z, timestamp):
     """Função que aplica as duas atualizações à matriz Z de timestamp ms em timestamp ms"""
-    utils.print_matrix(Z, "Matriz Z Inicial")
+    #utils.print_matrix(Z, "Matriz Z Inicial")
     first_update_Z(n, Z)
-    utils.print_matrix(Z, "Matriz Z (1ª atualização)")
+    #utils.print_matrix(Z, "Matriz Z (1ª atualização)")
     second_update_Z(n, Z)
-    utils.print_matrix(Z, "Matriz Z (2ª atualização)")
+    #utils.print_matrix(Z, "Matriz Z (2ª atualização)")
     time.sleep(timestamp/1000)
-
-c = configurations.Configurations("../config.conf")
-Z = matrix.get_matrix(c.n_matrix, c.master_key)
-
-while(True):
-    update_matrix_Z(c.n_matrix, Z, c.update_interval)

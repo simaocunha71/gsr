@@ -44,3 +44,11 @@ def create_random_number(min,max,seed):
     """Função que cria um inteiro aleatorio com uma determinada seed no intervalo [min,max]"""
     random.seed(seed) 
     return random.randint(min, max)
+
+def get_random_indexes(n_updated_times, Z, n):
+    """Função que devolve os indices aleatorios para o cálculo da chave"""
+    i = create_random_number(0, n - 1, n_updated_times + int(Z[0][0])) #Correto
+    j = create_random_number(0, n - 1, int(Z[i][0])) #TODO: FIX!
+    print("i " + str(i))
+    print("j " + str(j))
+    return i,j
