@@ -47,8 +47,22 @@ def create_random_number(min,max,seed):
 
 def get_random_indexes(n_updated_times, Z, n):
     """Função que devolve os indices aleatorios para o cálculo da chave"""
-    i = create_random_number(0, n - 1, n_updated_times + int(Z[0][0])) #Correto
-    j = create_random_number(0, n - 1, int(Z[i][0])) #TODO: FIX!
-    print("i " + str(i))
-    print("j " + str(j))
+    i = create_random_number(0, n - 1, n_updated_times + int(Z[0][0]))
+    j = create_random_number(0, n - 1, int(Z[i][0]))
     return i,j
+
+def create_fm_matrix():
+    """Função que cria a matriz fm cujos elementos são números entre 33 e 126 (por serem limites de códigos ASCII)"""
+    """Dimensão da matriz: (126-33+1)x(126-33+1) = 94x94 [exclui-se o caractere ' ']"""
+    fm = []
+    for i in range(94):
+        fm.append([])
+        for _ in range(94):
+            fm[i].append(random.randint(33, 126))
+    return fm
+
+
+def get_element_from_fm(fm, line_index, col_index):
+    """Função que devolve o valor da matriz fm dados o índice da linha e da coluna"""
+    return fm[int(line_index) - 33][int(col_index) - 33]
+

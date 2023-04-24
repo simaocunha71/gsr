@@ -22,7 +22,6 @@ class Configurations:
         self.max_store_time = self.get_value(''.join(f_lines), self.regex_max_store_time)        # Tempo máximo do armazenamento da informação na matriz
         self.n_max_entries = int(self.get_value(''.join(f_lines), self.regex_n_max_entries))     # Número máximo de entradas na tabela
         self.port = int(self.get_value(''.join(f_lines), self.regex_port))                       # Porta de atendimento UDP
-
         
     def get_value(self, file_content, regex):
         """Parse de um valor do ficheiro de configuração através de uma expressão regular qualquer"""

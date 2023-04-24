@@ -1,6 +1,5 @@
-import matrix, sys, utils, time
+import sys, utils, time
 sys.path.append('../')
-import model.configurations as configurations
 
 def first_update_Z(n, Z):
     """Função que aplica a 1ª atualização da matriz Z de acordo com o enunciado"""
@@ -10,7 +9,7 @@ def first_update_Z(n, Z):
 def second_update_Z(n, Z):
     """Função que aplica a 2ª atualização da matriz Z de acordo com o enunciado"""
     for j in range(n):
-        column = [row[j] for row in Z]  # obter a j-ésima coluna da matriz Z
+        column = [row[j] for row in Z]
         rotated_column = utils.rotate_vertical(column, utils.create_random_number(0, n - 1, column[0]))
         for i, row in enumerate(Z):
             row[j] = rotated_column[i]
