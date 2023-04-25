@@ -1,3 +1,5 @@
+"""Módulo de geração de chaves"""
+
 import utils, sys
 import update_matrix, matrix
 sys.path.append('../')
@@ -10,12 +12,12 @@ def generate_key(Z, line, col, fm_matrix):
     row1 = Z[line]
     row2 = [row[col] for row in Z]
 
-    row1_int = [int(c) for c in row1]
-    row2_int = [int(c) for c in row2]
+    #row1_int = [int(c) for c in row1]
+    #row2_int = [int(c) for c in row2]
 
     key = []
-    for i in range(len(row1_int)):
-        key.append(utils.get_element_from_fm(fm_matrix, row1_int[i], row2_int[i]))
+    for i in range(len(row1)):
+        key.append(utils.get_element_from_fm(fm_matrix, int(row1[i]), int(row2[i])))
 
     result_ascii = [chr(i) for i in key]
 

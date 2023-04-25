@@ -1,3 +1,5 @@
+"""Módulo de funções auxiliares ao programa"""
+
 import random
 
 def rotate(line,n_times):

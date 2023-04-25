@@ -1,3 +1,5 @@
+"""Módulo de testes das funções aplicadas às matrizes"""
+
 import utils
 
 ########################################################################

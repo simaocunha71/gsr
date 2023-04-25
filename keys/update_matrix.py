@@ -1,3 +1,5 @@
+"""Módulo de atualização da matriz Z"""
+
 import sys, utils, time
 sys.path.append('../')
 
