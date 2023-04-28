@@ -1,6 +1,6 @@
 """Módulo de testes das funções aplicadas às matrizes"""
 
-import utils
+import keys.utils as utils
 
 ########################################################################
 print("######### Teste da função rotate #########")

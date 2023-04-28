@@ -3,7 +3,7 @@
 import sys
 sys.path.append('../')
 import model.configurations as configurations
-import utils
+import keys.utils as utils
 import random
 
 def create_m1_m2(n,master_key):
@@ -37,13 +37,13 @@ def create_matrix_Zb(n, m2):
 
 
 #TODO: Usar random com seed S (sendo seed o valor n)?
-def create_matrix_Zs(n):
+def create_matrix_Zs(n, S):
     """Devolve a matriz Zs (de tamanho n) com elementos aleatórios no intervalo [0, 255]"""
     Zs = [[0 for i in range(n)] for j in range(n)]
     for i in range(n):
         for j in range(n):
-            #Zs[i][j] = utils.create_random_number(33,126,n)
-            Zs[i][j] = random.randint(33, 126)
+            Zs[i][j] = utils.create_random_number(33,126,S)
+            #Zs[i][j] = random.randint(33, 126)
     return Zs
 
 def create_matrix_Z(n,Za,Zb,Zs,fm):
@@ -61,12 +61,12 @@ def create_matrix_Z(n,Za,Zb,Zs,fm):
 
 
 
-def get_matrix(n,master_key, fm_matrix):
+def get_matrix(n,master_key, fm_matrix, S):
     """Função principal deste módulo que devolve a matriz Z a partir do valor n e da master_key do ficheiro de configuração"""
     m1,m2 = create_m1_m2(n, master_key)
     Za = create_matrix_Za(n, m1)
     Zb = create_matrix_Zb(n, m2)
-    Zs = create_matrix_Zs(n)
+    Zs = create_matrix_Zs(n, S)
     Z = create_matrix_Z(n, Za, Zb, Zs, fm_matrix)
 
     utils.print_matrix(Za, "Matriz Za", m1)
@@ -77,6 +77,6 @@ def get_matrix(n,master_key, fm_matrix):
     return Z
 
 #Eliminar este codigo quando a matriz Z tiver a implementação correta
-c = configurations.Configurations("../config.conf")
-fm_matrix = utils.create_fm_matrix()
-get_matrix(c.n_matrix, c.master_key, fm_matrix)
+#c = configurations.Configurations("config.conf")
+#fm_matrix = utils.create_fm_matrix()
+#get_matrix(c.n_matrix, c.master_key, fm_matrix)
