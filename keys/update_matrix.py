@@ -1,6 +1,7 @@
 """Módulo de atualização da matriz Z"""
 
-import sys, keys.utils, time
+import sys, time
+import keys.utils as utils
 sys.path.append('../')
 
 def first_update_Z(n, Z):
