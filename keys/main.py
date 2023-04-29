@@ -2,13 +2,12 @@
 
 import keys.utils as utils
 import sys
-import keys.update_matrix, keys.matrix
 sys.path.append('../')
-import model.configurations as configurations
 
 
-def generate_key(Z, line, col, fm_matrix):
+def generate_key(Z, line, col, fm_matrix, IDRequest):
     """Função que gera uma chave de comprimento K, usando a matriz Z, indices line e col escolhidos aleatoriamente e a matriz fm"""
+    """Exempo de chave: "1 bdsahhaid#%i"""
     row1 = Z[line]
     row2 = [row[col] for row in Z]
 
@@ -18,4 +17,5 @@ def generate_key(Z, line, col, fm_matrix):
 
     result_ascii = [chr(i) for i in key]
 
-    return ''.join(result_ascii)
+    single_string = ''.join(result_ascii)
+    return str(IDRequest) + " " + single_string

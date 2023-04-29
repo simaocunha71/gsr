@@ -69,11 +69,11 @@ def get_matrix(n,master_key, fm_matrix, S):
     Zs = create_matrix_Zs(n, S)
     Z = create_matrix_Z(n, Za, Zb, Zs, fm_matrix)
 
-    utils.print_matrix(Za, "Matriz Za", m1)
-    utils.print_matrix(Zb, "Matriz Zb", m2)
-    utils.print_matrix(Zs, "Matriz Zs")
+    #utils.print_matrix(Za, "Matriz Za", m1)
+    #utils.print_matrix(Zb, "Matriz Zb", m2)
+    #utils.print_matrix(Zs, "Matriz Zs")
     #utils.print_matrix(fm_matrix, "Matriz fm")
-    utils.print_matrix(Z, "Matriz Z")
+    #utils.print_matrix(Z, "Matriz Z")
     return Z
 
 #Eliminar este codigo quando a matriz Z tiver a implementação correta
