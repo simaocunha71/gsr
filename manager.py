@@ -1,10 +1,6 @@
 """Módulo que implementa o manager"""
 import socket
 
-AGENT_HOST = 'localhost' 
-AGENT_PORT = 2048  
-BUFFER_SIZE = 4096
-
 class Manager:
     def __init__(self):
         self.AGENT_HOST  = 'localhost' # Endereço do socket
