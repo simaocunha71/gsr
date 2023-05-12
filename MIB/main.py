@@ -17,17 +17,8 @@ class MIB:
 
     def to_string(self):
         """Função que representa a MIB em string"""
-        print(len(self.system_list.objects))
-        for mib_obj in self.system_list.objects:
-            mib_obj.to_string()
-
-        print(len(self.config_list.objects))
-        for mib_obj in self.config_list.objects:
-            mib_obj.to_string()
-
-        print(len(self.data.objects))
-        for mib_obj in self.data.objects:
-            mib_obj.to_string()
+        for _, o in self.dictionary.items():
+            o.to_string()
 
 mib = MIB("mib.mib")
 mib.to_string()

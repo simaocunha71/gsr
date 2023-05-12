@@ -119,7 +119,7 @@ keyValue OBJECT-TYPE
     DESCRIPTION "The value of a generated key (K bytes/characters long)."
     ::= { dataTableGeneratedKeysEntry 2 }
 
-KeyRequester OBJECT-TYPE
+keyRequester OBJECT-TYPE
     SYNTAX OCTET STRING
     MAX-ACCESS read-only
     STATUS current

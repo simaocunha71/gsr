@@ -21,7 +21,9 @@ class MIB_Config:
             description = match.group('description')
             id_type = match.group('id_type')
             id_int = match.group('id_int')
-            mib_obj = obj.MIB_Object(id_type, id_int, object_type, syntax, max_access, status, description)
+            
+            #TODO: Mudar o value para os valores corretos - está neste momento com "VALOR DEFAULT"
+            mib_obj = obj.MIB_Object(id_type, id_int, object_type, syntax, max_access, status, description, "VALOR DEFAULT")
             self.objects.append(mib_obj)
 
     def to_string(self):
