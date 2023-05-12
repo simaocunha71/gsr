@@ -1,7 +1,7 @@
 """Módulo que implementa o agente"""
 
 import model.configurations as configurations
-import MIB.mib as mib
+import MIB.main as main
 import keys.main as keygen
 import keys.matrix as matrix
 import keys.update_matrix as update_matrix
