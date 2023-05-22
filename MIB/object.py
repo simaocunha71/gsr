@@ -19,7 +19,8 @@ class MIB_Object:
         print(f"    MAX-ACCESS {self.max_access}")
         print(f"    STATUS {self.status}")
         print(f"    DESCRIPTION \"{self.description}\"")
-        print(f"    VALUE = {self.value}")
+        if self.value is not None:
+            print(f"    VALUE = {self.value}")
         print(f"    ::= {{ {self.id_type} {self.id_int} }} ")
 
     """Getters da classe Object"""

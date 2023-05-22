@@ -1,13 +1,6 @@
 """Classe que implementa a MIB"""
 import system, config, keys
 
-"""
-TODO:
-- Esta classe terá que ler o ficheiro principal e passar os dados às outras classes
-- Parse dos OID's dos grupos ??? [Ver função init]
-"""
-
-
 class MIB:
     def __init__(self, filename):
         self.dictionary = {}
@@ -20,5 +13,24 @@ class MIB:
         for _, o in self.dictionary.items():
             o.to_string()
 
+    def get_group(self, oid):
+        """Devolve o grupo dado o seu oid"""
+        try:
+            return self.dictionary.get(oid)
+        except:
+            print("Erro em obter grupo - OID não existente na MIB")
+
+    def print_group(self, oid):
+        """Imprime um grupo dado o seu OID"""
+        try:
+            group = self.get_group(oid)
+            if group is not None:
+                group.to_string()
+            else:
+                print("Erro em obter grupo - OID não existente na MIB")
+        except:
+            print("Erro em obter grupo - OID não existente na MIB")
+
+
 mib = MIB("mib.mib")
-mib.to_string()
+mib.print_group(3)
