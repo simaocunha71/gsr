@@ -1,8 +1,3 @@
-#Valores dos objetos vão ser dados estaticamente através de variaveis globais. 
-#Na versão definitiva, o agente vai passar estes argumentos para a classe MIB, que por sua vez vai passar para o grupo system/config/keys
-
-#TODO: Fazer funçoes auxiliares de povoaçao dos objetos da MIB
-
 import datetime
 
 def get_timestamp ():

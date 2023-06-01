@@ -53,14 +53,14 @@ def get_random_indexes(n_updated_times, Z, n):
     j = create_random_number(0, n - 1, int(Z[i][0]))
     return i,j
 
-def create_fm_matrix():
+def create_fm_matrix(n,m):
     """Função que cria a matriz fm cujos elementos são números entre 33 e 126 (por serem limites de códigos ASCII)"""
     """Dimensão da matriz: (126-33+1)x(126-33+1) = 94x94 [exclui-se o caractere ' ']"""
     fm = []
     for i in range(94):
         fm.append([])
         for _ in range(94):
-            fm[i].append(random.randint(33, 126))
+            fm[i].append(random.randint(n, m))
     return fm
 
 
@@ -68,3 +68,6 @@ def get_element_from_fm(fm, line_index, col_index):
     """Função que devolve o valor da matriz fm dados o índice da linha e da coluna"""
     return fm[int(line_index) - 33][int(col_index) - 33]
 
+def get_fst_ascii_code_in_key(master_key):
+    """Função que devolve o código ASCII do primeiro caracter usado na chave"""
+    return ord(master_key[0])

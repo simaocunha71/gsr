@@ -1,5 +1,5 @@
-import mib_table.table as table
-import object as obj
+import MIB.table as table
+import MIB.object as obj
 
 class MIB_Keys:
     

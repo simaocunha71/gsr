@@ -1,11 +1,13 @@
 """Classe que implementa a MIB"""
-import system, config, keys
+import MIB.system as system
+import MIB.config as config
+import MIB.keys as keys
 
 class MIB:
-    def __init__(self, filename):
+    def __init__(self, filename, K, updating_interval, max_keys, ttl, master_key, fst_ascii_code, number_of_chars):
         self.dictionary = {}
-        self.dictionary[1] = system.MIB_System(filename)
-        self.dictionary[2] = config.MIB_Config(filename)
+        self.dictionary[1] = system.MIB_System(filename, K, updating_interval, max_keys, ttl)
+        self.dictionary[2] = config.MIB_Config(filename, master_key, fst_ascii_code, number_of_chars)
         self.dictionary[3] = keys.MIB_Keys(filename)
 
     def to_string(self):
@@ -32,5 +34,5 @@ class MIB:
             print("Erro em obter grupo - OID não existente na MIB")
 
 
-mib = MIB("mib.mib")
-mib.print_group(3)
+#mib = MIB("mib.mib")
+#mib.print_group(1)

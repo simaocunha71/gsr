@@ -1,6 +1,6 @@
 """Classe que representa a tabela da MIB"""
 
-from .entry import DataTableGeneratedKeysEntry
+from MIB.entry import DataTableGeneratedKeysEntry
 
 class DataTableGeneratedKeys:
     id_key = 1

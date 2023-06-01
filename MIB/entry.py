@@ -1,6 +1,6 @@
 """Classe que representa uma entrada da tabela da MIB"""
 import re
-from object import MIB_Object
+from MIB.object import MIB_Object
 
 class DataTableGeneratedKeysEntry:
 
@@ -25,7 +25,7 @@ class DataTableGeneratedKeysEntry:
             id_type = match.group('id_type')
             id_int = match.group('id_int')
             
-            mib_obj = None
+            entry = None
 
             if object_type == "keyId":
                 entry = MIB_Object(id_type, id_int, object_type, syntax, max_access, status, description, id_key)

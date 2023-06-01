@@ -10,16 +10,50 @@ import time
 import socket
 import threading
 
+def export_mib_to_file(mib, filename):
+    with open(filename, 'w') as f:
+        group1 = mib.print_group(1)
+        if group1 is not None:
+            f.write(group1)
+
+        group2 = mib.print_group(2)
+        if group2 is not None:
+            f.write(group2)
+
+        group3 = mib.print_group(3)
+        if group3 is not None:
+            f.write(group3)
+
+
+
+def fill_initially_MIB(configurations):
+    """Cria e preenche o MIB com chaves e valores aleatórios"""
+    # System content
+    K = configurations.get_n_matrix()
+    updating_interval = configurations.get_update_interval()
+    max_keys = configurations.get_n_max_entries()
+    ttl = configurations.get_max_store_time()
+
+    # Config content
+    master_key = configurations.get_master_key()
+    fst_ascii_code = configurations.get_min()
+    _max = configurations.get_max()
+    number_of_chars = _max - fst_ascii_code + 1
+
+    return main.MIB("MIB/mib.mib", K, updating_interval, max_keys, ttl, master_key, fst_ascii_code, number_of_chars)
+
+
+
 class Agent:
     def __init__(self):
-        self.n_lock = threading.Lock()     # Lock para a variável "n_updated_times"
-        self.id_lock = threading.Lock()    # Lock para a variável "idRequest"
-        self.n_updated_times = 0           # Nº de vezes que agente atualizou a matriz Z
-        self.bufferSize      = 4096        # Tamanho do buffer do socket entre agente e gestor
-        self.HOST            = 'localhost' # Endereço do socket
-        self.IDRequests      = 0           # ID de pedidos respondidos (a começar em 0)
-        self.current_time    = None        # Início em segundos do funcionamento do agente (sem valor aqui)
-
+        self.n_lock          = threading.Lock() # Lock para a variável "n_updated_times"
+        self.id_lock         = threading.Lock() # Lock para a variável "idRequest"
+        self.n_updated_times = 0                # Nº de vezes que agente atualizou a matriz Z
+        self.bufferSize      = 4096             # Tamanho do buffer do socket entre agente e gestor
+        self.HOST            = 'localhost'      # Endereço do socket
+        self.IDRequests      = 0                # ID de pedidos respondidos (a começar em 0)
+        self.current_time    = None             # Início em segundos do funcionamento do agente (sem valor aqui)
+        
     def get_timestamp(current_time):
         """Devolve o timestamp S sempre que se chama esta função - nº de segundos passados em que o agente iniciou/reiniciou"""
         return int(time.time() - float(current_time))
@@ -40,7 +74,7 @@ class Agent:
         self.n_lock.release()
         return n_updated_times
 
-    def handle_request(self, sock, data, addr, F):
+    def handle_request(self, sock, data, addr, F, mib):
         """Função que trata do pedido de um manager"""
 
         # Imprime a mensagem recebida
@@ -49,7 +83,7 @@ class Agent:
         S = Agent.get_timestamp(self.current_time)
 
         # Criação das matrizes fm e Z (inicial)
-        fm_matrix = utils.create_fm_matrix()
+        fm_matrix = utils.create_fm_matrix(F.min,F.max)
         Z = matrix.get_matrix(F.n_matrix, F.master_key, fm_matrix, S) 
     
         # Atualização de matrizes e geração da chave
@@ -62,6 +96,8 @@ class Agent:
         key = keygen.generate_key(Z, line_index, col_index, fm_matrix, idRequest)
         print(f"Created key \"{key}\"")
 
+        export_mib_to_file(mib, "mib_filled.txt")
+
         # Envia a resposta para o cliente
         sock.sendto(key.encode(), addr)  
 
@@ -73,6 +109,8 @@ if __name__ == "__main__":
 
     # Leitura do ficheiro
     F = configurations.Configurations("config.conf") 
+
+    mib = fill_initially_MIB(F)
 
     # Criação do Socket UDP
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -89,6 +127,6 @@ if __name__ == "__main__":
         data, addr = sock.recvfrom(ag.bufferSize)
 
         # Cria uma nova thread para tratar a mensagem recebida
-        t = threading.Thread(target=ag.handle_request, args=(sock, data, addr, F))
+        t = threading.Thread(target=ag.handle_request, args=(sock, data, addr, F, mib))
         t.start()
 

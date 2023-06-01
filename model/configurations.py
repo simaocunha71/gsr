@@ -22,11 +22,46 @@ class Configurations:
         self.max_store_time = self.get_value(''.join(f_lines), self.regex_max_store_time)        # Tempo máximo do armazenamento da informação na matriz
         self.n_max_entries = int(self.get_value(''.join(f_lines), self.regex_n_max_entries))     # Número máximo de entradas na tabela
         self.port = int(self.get_value(''.join(f_lines), self.regex_port))                       # Porta de atendimento UDP
+        self.min = 33                                                                            # Valor mínimo do código ASCII para a matriz fm
+        self.max = 126                                                                           # Valor máximo do código ASCII para a matriz fm
         
     def get_value(self, file_content, regex):
         """Parse de um valor do ficheiro de configuração através de uma expressão regular qualquer"""
         match = re.search(regex, file_content)
         return match.group(1) if match else ""
+
+    def get_n_matrix(self):
+        """Devolve o número de linhas ou colunas da matriz"""
+        return self.n_matrix
+
+    def get_master_key(self):
+        """Devolve a chave mestra"""
+        return self.master_key
+
+    def get_update_interval(self):
+        """Devolve o intervalo(em ms) de atualizações de matrizes"""
+        return self.update_interval
+
+    def get_max_store_time(self):
+        """Devolve o tempo máximo do armazenamento da informação na matriz"""
+        return self.max_store_time
+
+    def get_n_max_entries(self):
+        """Devolve o número máximo de entradas na tabela"""
+        return self.n_max_entries
+
+    def get_port(self):
+        """Devolve a porta de atendimento UDP"""
+        return self.port
+    
+    def get_min(self):
+        """Devolve o valor mínimo do código ASCII para a matriz fm"""
+        return self.min
+    
+    def get_max(self):
+        """Devolve o valor máximo do código ASCII para a matriz fm"""
+        return self.max
+
 
     def print_configurations(self):
         "Função de debug: objeto Configurations com o conteúdo do ficheiro de configuração"
