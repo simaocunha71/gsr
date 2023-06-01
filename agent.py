@@ -10,21 +10,6 @@ import time
 import socket
 import threading
 
-def export_mib_to_file(mib, filename):
-    with open(filename, 'w') as f:
-        group1 = mib.print_group(1)
-        if group1 is not None:
-            f.write(group1)
-
-        group2 = mib.print_group(2)
-        if group2 is not None:
-            f.write(group2)
-
-        group3 = mib.print_group(3)
-        if group3 is not None:
-            f.write(group3)
-
-
 
 def fill_initially_MIB(configurations):
     """Cria e preenche o MIB com chaves e valores aleatórios"""
@@ -96,7 +81,7 @@ class Agent:
         key = keygen.generate_key(Z, line_index, col_index, fm_matrix, idRequest)
         print(f"Created key \"{key}\"")
 
-        export_mib_to_file(mib, "mib_filled.txt")
+        mib.to_string()
 
         # Envia a resposta para o cliente
         sock.sendto(key.encode(), addr)  
