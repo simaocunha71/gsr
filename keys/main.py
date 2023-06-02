@@ -5,7 +5,7 @@ import sys
 sys.path.append('../')
 
 
-def generate_key(Z, line, col, fm_matrix, IDRequest):
+def generate_key(Z, line, col, fm_matrix):
     """Função que gera uma chave de comprimento K, usando a matriz Z, indices line e col escolhidos aleatoriamente e a matriz fm"""
     """Exempo de chave: "1 bdsahhaid#%i"""
     row1 = Z[line]
@@ -17,5 +17,4 @@ def generate_key(Z, line, col, fm_matrix, IDRequest):
 
     result_ascii = [chr(i) for i in key]
 
-    single_string = ''.join(result_ascii)
-    return str(IDRequest) + " " + single_string
+    return ''.join(result_ascii)

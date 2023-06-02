@@ -9,6 +9,7 @@ import keys.utils as utils
 import time
 import socket
 import threading
+import communication.pdu as pdu
 
 
 def fill_initially_MIB(configurations):
@@ -36,20 +37,11 @@ class Agent:
         self.n_updated_times = 0                # Nº de vezes que agente atualizou a matriz Z
         self.bufferSize      = 4096             # Tamanho do buffer do socket entre agente e gestor
         self.HOST            = 'localhost'      # Endereço do socket
-        self.IDRequests      = 0                # ID de pedidos respondidos (a começar em 0)
         self.current_time    = None             # Início em segundos do funcionamento do agente (sem valor aqui)
         
     def get_timestamp(current_time):
         """Devolve o timestamp S sempre que se chama esta função - nº de segundos passados em que o agente iniciou/reiniciou"""
         return int(time.time() - float(current_time))
-
-    def get_n_inc_idRequest(self):
-        """Função que faz controlo de concorrência na leitura e no incremento da variável "idRequest" """
-        self.id_lock.acquire()
-        idRequest = self.IDRequests
-        self.IDRequests += 1
-        self.id_lock.release()
-        return idRequest 
     
     def get_n_inc_n_updated_times(self):
         """Função que faz controlo de concorrência na leitura e no incremento da variável "n_updated_times" """
@@ -62,8 +54,19 @@ class Agent:
     def handle_request(self, sock, data, addr, F, mib):
         """Função que trata do pedido de um manager"""
 
+        #TODO: 
+        """
+        - Escrever corretamente lista de instancias (adicionar os novos valores dependendo das primitivas)
+        - Escrever corretamente a lista de erros (fazer controlo de erros)
+        - Escrever/consultar valores na MIB (usá-la nesta função)
+        - Impedir o manager de usar o mesmo id_request de X em X segundos (ver enunciado)
+        - Arranjar forma de como cliente vai estar ligado para consultar o valor da chave
+            -> segundo o enunciado, cliente faz set() e depois faz get()
+        """
+
         # Imprime a mensagem recebida
-        print(f"Recebido de {addr}: {data.decode()}")  
+        pdu_received = pdu.PDU.decode(data)
+        pdu_received.to_string()
 
         S = Agent.get_timestamp(self.current_time)
 
@@ -77,14 +80,27 @@ class Agent:
         n_updated_times = self.get_n_inc_n_updated_times()
         line_index, col_index = utils.get_random_indexes(n_updated_times, Z, F.n_matrix)
             
-        idRequest = self.get_n_inc_idRequest()
-        key = keygen.generate_key(Z, line_index, col_index, fm_matrix, idRequest)
+        key = keygen.generate_key(Z, line_index, col_index, fm_matrix)
         print(f"Created key \"{key}\"")
 
-        mib.to_string()
+        #mib.to_string() #NOTE: DEBUG
 
-        # Envia a resposta para o cliente
-        sock.sendto(key.encode(), addr)  
+        primitive_type = 0 #É valor tomado pelas responses
+
+        #TODO: tratar dos instance_elements_list (e instance_elements_size)
+        #TODO: tratar dos errors_elements_list (e errors_elements_size)
+        
+        #NOTE: No TP1, este valores vão ficar assim
+        security_level=0
+        n_security_parameters_number=0
+        n_security_parameters_list=[]
+
+        pdu_response = pdu.PDU(pdu_received.get_request_id(), primitive_type, 
+                               pdu_received.get_instance_elements_size(), pdu_received.get_instance_elements_list(), # NOTE: Provisorio!
+                               pdu_received.get_error_elements_size(), pdu_received.get_error_elements_list(),       # NOTE: Provisorio!
+                               security_level, n_security_parameters_number, n_security_parameters_list) 
+
+        sock.sendto(pdu_response.encode(), addr)
 
 
 if __name__ == "__main__":
