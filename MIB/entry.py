@@ -7,13 +7,13 @@ class DataTableGeneratedKeysEntry:
     # Expressão regular para dar match com um objeto do grupo Key
     regex = r"(?P<object_type>\w+)\s+OBJECT-TYPE\s+SYNTAX\s+(?P<syntax>\w+(?:\s+\w+)*)\s+MAX-ACCESS\s+(?P<max_access>\w+(?:-\w+)?)\s+STATUS\s+(?P<status>\w+)\s+DESCRIPTION\s+\"(?P<description>[^\"]+)\"\s+::=\s+{\s+(?P<id_type>dataTableGeneratedKeysEntry)\s+(?P<id_int>\d+)\s+}\s*"
 
-    def __init__(self, filename, id_key):
+    def __init__(self, filename, id_key, keyValue, keyRequester, keyExpirationDate, keyExpirationTime, keyVisibility):
         with open(filename, 'r') as file:
             content = file.read().replace('\n', '')
         self.fields = {} 
-        self.create_entry(content, id_key)
+        self.create_entry(content, id_key, keyValue, keyRequester, keyExpirationDate, keyExpirationTime, keyVisibility)
 
-    def create_entry(self, content, id_key):
+    def create_entry(self, content, id_key, keyValue, keyRequester, keyExpirationDate, keyExpirationTime, keyVisibility):
         """Função que adiciona todos os parâmetros de uma entrada da tabela"""
         matches = re.finditer(self.regex, content)
         for match in matches:
@@ -30,15 +30,15 @@ class DataTableGeneratedKeysEntry:
             if object_type == "keyId":
                 entry = MIB_Object(id_type, id_int, object_type, syntax, max_access, status, description, id_key)
             elif object_type == "keyValue":
-                entry = MIB_Object(id_type, id_int, object_type, syntax, max_access, status, description, self.get_keyValue())
+                entry = MIB_Object(id_type, id_int, object_type, syntax, max_access, status, description, keyValue)
             elif object_type == "keyRequester":
-                entry = MIB_Object(id_type, id_int, object_type, syntax, max_access, status, description, self.get_keyRequester())
+                entry = MIB_Object(id_type, id_int, object_type, syntax, max_access, status, description, keyRequester)
             elif object_type == "keyExpirationDate":
-                entry = MIB_Object(id_type, id_int, object_type, syntax, max_access, status, description, self.get_keyExpirationDate())
+                entry = MIB_Object(id_type, id_int, object_type, syntax, max_access, status, description, keyExpirationDate)
             elif object_type == "keyExpirationTime":
-                entry = MIB_Object(id_type, id_int, object_type, syntax, max_access, status, description, self.get_keyExpirationTime())
+                entry = MIB_Object(id_type, id_int, object_type, syntax, max_access, status, description, keyExpirationTime)
             elif object_type == "keyVisibility":
-                entry = MIB_Object(id_type, id_int, object_type, syntax, max_access, status, description, self.get_keyVisibility())
+                entry = MIB_Object(id_type, id_int, object_type, syntax, max_access, status, description, keyVisibility)
 
             self.fields[object_type] = entry
 
@@ -57,26 +57,7 @@ class DataTableGeneratedKeysEntry:
             if (f.id_int == index):
                 return f
         raise ValueError("Não existe campo com índice {}".format(index))
-    
-    def get_keyValue(self):
-        #TODO: a mudar - agente vai comunicar este valor
-        return "mplq.dq?'q"
 
-    def get_keyRequester(self):
-        #TODO: a mudar - agente vai comunicar este valor
-        return "192.150.43.1"
-
-    def get_keyExpirationDate(self):
-        #TODO: a mudar - agente vai comunicar este valor
-        return 1002
-
-    def get_keyExpirationTime(self):
-        #TODO: a mudar - agente vai comunicar este valor
-        return 421
-
-    def get_keyVisibility(self):
-        #TODO: a mudar - agente vai comunicar este valor
-        return 0
 
 #d = DataTableGeneratedKeysEntry("mib.mib", 0)
 #d.to_string()

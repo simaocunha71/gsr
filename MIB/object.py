@@ -47,6 +47,7 @@ class MIB_Object:
     
     def get_value(self):
         return self.value
+
     
     """Setters a classe Object"""
     def set_id_type(self, id_type):

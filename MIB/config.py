@@ -39,7 +39,7 @@ class MIB_Config:
 
     def to_string(self):
         """Função que representa o grupo Config da MIB em string"""
-        print(len(self.objects))
+        #print(len(self.objects))
         for mib_obj in self.objects:
             mib_obj.to_string()
 

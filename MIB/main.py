@@ -8,7 +8,7 @@ class MIB:
         self.dictionary = {}
         self.dictionary[1] = system.MIB_System(filename, K, updating_interval, max_keys, ttl)
         self.dictionary[2] = config.MIB_Config(filename, master_key, fst_ascii_code, number_of_chars)
-        self.dictionary[3] = keys.MIB_Keys(filename)
+        self.dictionary[3] = keys.MIB_Keys()
 
     def to_string(self):
         """Função que representa a MIB em string"""

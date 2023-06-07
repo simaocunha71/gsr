@@ -3,19 +3,18 @@ import MIB.object as obj
 
 class MIB_Keys:
     
-    def __init__(self, filename):
+    def __init__(self):
         self.objects = []
-        self.dataTableGeneratedKeys = table.DataTableGeneratedKeys(filename)
+        self.dataTableGeneratedKeys = table.DataTableGeneratedKeys()
         self.get_objects()
 
     def get_objects(self):
-        """Função que adiciona os objetos do grupo data manualmente (i.e. sem fazer o parsing)
-           -> Não faço parse do valor do index (possível limitação do programa), mas que deve chegar para o propósito"""
+        """Função que adiciona os objetos do grupo data manualmente (i.e. sem fazer o parsing)"""
         self.objects.extend([
             obj.MIB_Object("data", 1, "dataNumberOfValidKeys", "INTEGER", 
                            "read-only", "current", 
                            "The number of elements in the dataTableGeneratedKeys.", 
-                           self.get_n_valid_keys()),
+                           self.dataTableGeneratedKeys.dataNumberOfValidKeys),
             obj.MIB_Object("data", 2, "dataTableGeneratedKeys", "SEQUENCE OF DataTableGeneratedKeysEntryType", 
                            "not-accessible", "mandatory", 
                            "A table with information from all created keys that are still valid.", 
@@ -26,15 +25,16 @@ class MIB_Keys:
                            None)
         ])
 
-    def get_n_valid_keys(self):
-        return self.dataTableGeneratedKeys.get_dataNumberOfValidKeys()
+    def update_n_valid_keys(self, objects):
+        new_val = self.dataTableGeneratedKeys.dataNumberOfValidKeys + 1
+        return objects[0].set_value(new_val) 
+    
+    def get_table(self):
+        self.update_n_valid_keys(self.objects)
+        return self.dataTableGeneratedKeys
     
     def to_string(self):
         print(len(self.objects))
         for mib_obj in self.objects:
             mib_obj.to_string()
         self.dataTableGeneratedKeys.to_string()
-
-    def receive_values_from_agent():
-        #TODO: Fazer o parse dos valores enviados pelo agente para povoar os objetos do data (necessario???)
-        pass

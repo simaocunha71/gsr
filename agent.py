@@ -11,6 +11,35 @@ import socket
 import threading
 import communication.pdu as pdu
 
+import datetime
+
+def get_date_and_time_expiration(ttl):
+    current_datetime = datetime.datetime.now()
+    
+    expiration_date = current_datetime + datetime.timedelta(seconds=ttl)
+    
+    # Obter os componentes de data e hora
+    YY = expiration_date.year 
+    MM = expiration_date.month
+    DD = expiration_date.day
+    HH = expiration_date.hour
+    MM = expiration_date.minute
+    SS = expiration_date.second
+    
+    # Calcular os valores no formato desejado
+    expiration_date_val = YY * 104 + MM * 102 + DD
+    expiration_time_val = HH * 104 + MM * 102 + SS
+    
+    return (expiration_date_val, expiration_time_val)
+
+
+
+
+def is_keygen_request(pdu_received):
+    """Verifica se o último número é 0 e se a lista de ids é maior do que 0 (true se se verificar, false caso contrário)"""
+    instance_elements_list = pdu_received.get_instance_elements_list()
+    return instance_elements_list[-1] == 0 and len(instance_elements_list) > 0
+
 
 def fill_initially_MIB(configurations):
     """Cria e preenche o MIB com chaves e valores aleatórios"""
@@ -56,10 +85,12 @@ class Agent:
 
         #TODO: 
         """
-        - Escrever corretamente lista de instancias (adicionar os novos valores dependendo das primitivas)
-        - Escrever corretamente a lista de erros (fazer controlo de erros)
-        - Escrever/consultar valores na MIB (usá-la nesta função)
+        - Na criação de uma chave, saber que valor colocar no key_visibility (neste momento está a 2)
         - Impedir o manager de usar o mesmo id_request de X em X segundos (ver enunciado)
+        - Implementar comandos set (exceto o de criação de chave que ja está feito) e get
+        - No comando response, adicionar corretamente a lista de instancias (adicionar os novos valores dependendo das primitivas)
+        - No comando response, adicionar corretamente a lista de erros (adicionar os novos valores dependendo das primitivas)
+        - Nao escrever novas chaves se o nº de chaves já existentes for o maximo permitido
         - Arranjar forma de como cliente vai estar ligado para consultar o valor da chave
             -> segundo o enunciado, cliente faz set() e depois faz get()
         """
@@ -70,18 +101,39 @@ class Agent:
 
         S = Agent.get_timestamp(self.current_time)
 
-        # Criação das matrizes fm e Z (inicial)
-        fm_matrix = utils.create_fm_matrix(F.min,F.max)
-        Z = matrix.get_matrix(F.n_matrix, F.master_key, fm_matrix, S) 
-    
-        # Atualização de matrizes e geração da chave
-        update_matrix.update_matrix_Z(F.n_matrix, Z, F.update_interval)
+        client_ip = addr[0]
 
-        n_updated_times = self.get_n_inc_n_updated_times()
-        line_index, col_index = utils.get_random_indexes(n_updated_times, Z, F.n_matrix)
+        if is_keygen_request(pdu_received) == True:
+            # Criação das matrizes fm e Z (inicial)
+            fm_matrix = utils.create_fm_matrix(F.min,F.max)
+            Z = matrix.get_matrix(F.n_matrix, F.master_key, fm_matrix, S) 
+
+            # Atualização de matrizes e geração da chave
+            update_matrix.update_matrix_Z(F.n_matrix, Z, F.update_interval)
+
+            n_updated_times = self.get_n_inc_n_updated_times()
+            line_index, col_index = utils.get_random_indexes(n_updated_times, Z, F.n_matrix)
+
+            key = keygen.generate_key(Z, line_index, col_index, fm_matrix)
+
+            date = get_date_and_time_expiration(int(F.max_store_time))
+
+            mib.get_group(3).get_table().create_entry("MIB/mib.mib", key, client_ip, date[0], date[1], 2)
+            mib.to_string()
             
-        key = keygen.generate_key(Z, line_index, col_index, fm_matrix)
-        print(f"Created key \"{key}\"")
+            #TODO: Adicionar uma nova linha à MIB e preencher os valores da PDU de resposta (apenas os necessários (ou todos???))
+
+
+        elif pdu_received.get_primitive_type() == 1: #get
+            #Verificar se pedido está na MIB e verificar se acontecem os erros que estão no enunciado
+            pass
+        elif pdu_received.get_primitive_type() == 2: #set
+            #Verificar se pedido está na MIB e verificar se acontecem os erros que estão no enunciado
+            pass
+        else:
+            #TODO: Criar erro de primitiva nao suportada e adicion+a-la à pdu de resposta
+            pass
+
 
         #mib.to_string() #NOTE: DEBUG
 
