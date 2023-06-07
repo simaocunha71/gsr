@@ -103,6 +103,16 @@ class Agent:
 
         client_ip = addr[0]
 
+        primitive_type = 0 #É valor tomado pelas responses
+
+        #TODO: tratar dos instance_elements_list (e instance_elements_size)
+        #TODO: tratar dos errors_elements_list (e errors_elements_size)
+        
+        #NOTE: No TP1, este valores vão ficar assim
+        security_level=0
+        n_security_parameters_number=0
+        n_security_parameters_list=[]
+
         if is_keygen_request(pdu_received) == True:
             # Criação das matrizes fm e Z (inicial)
             fm_matrix = utils.create_fm_matrix(F.min,F.max)
@@ -118,11 +128,19 @@ class Agent:
 
             date = get_date_and_time_expiration(int(F.max_store_time))
 
-            mib.get_group(3).get_table().create_entry("MIB/mib.mib", key, client_ip, date[0], date[1], 2)
+            key_id_generated = mib.get_group(3).get_table().create_entry("MIB/mib.mib", key, client_ip, date[0], date[1], 2)
             mib.to_string()
+
+            list_elements = pdu_received.get_instance_elements_list()
+            list_elements.append(key_id_generated)
             
             #TODO: Adicionar uma nova linha à MIB e preencher os valores da PDU de resposta (apenas os necessários (ou todos???))
+            pdu_response = pdu.PDU(pdu_received.get_request_id(), primitive_type, 
+                                   len(list_elements), list_elements, # NOTE: Provisorio!
+                                   pdu_received.get_error_elements_size(), pdu_received.get_error_elements_list(),       # NOTE: Provisorio!
+                                   security_level, n_security_parameters_number, n_security_parameters_list) 
 
+            sock.sendto(pdu_response.encode(), addr)
 
         elif pdu_received.get_primitive_type() == 1: #get
             #Verificar se pedido está na MIB e verificar se acontecem os erros que estão no enunciado
@@ -135,24 +153,9 @@ class Agent:
             pass
 
 
-        #mib.to_string() #NOTE: DEBUG
 
-        primitive_type = 0 #É valor tomado pelas responses
 
-        #TODO: tratar dos instance_elements_list (e instance_elements_size)
-        #TODO: tratar dos errors_elements_list (e errors_elements_size)
-        
-        #NOTE: No TP1, este valores vão ficar assim
-        security_level=0
-        n_security_parameters_number=0
-        n_security_parameters_list=[]
 
-        pdu_response = pdu.PDU(pdu_received.get_request_id(), primitive_type, 
-                               pdu_received.get_instance_elements_size(), pdu_received.get_instance_elements_list(), # NOTE: Provisorio!
-                               pdu_received.get_error_elements_size(), pdu_received.get_error_elements_list(),       # NOTE: Provisorio!
-                               security_level, n_security_parameters_number, n_security_parameters_list) 
-
-        sock.sendto(pdu_response.encode(), addr)
 
 
 if __name__ == "__main__":

@@ -14,6 +14,7 @@ class DataTableGeneratedKeys:
         self.dataTableGeneratedKeys[self.id_key] = et
         self.dataNumberOfValidKeys += 1
         self.id_key += 1
+        return self.id_key - 1
 
     def remove_entry(self, key_id):
         self.dataTableGeneratedKeys.pop(key_id)

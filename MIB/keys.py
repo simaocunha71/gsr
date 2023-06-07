@@ -34,7 +34,7 @@ class MIB_Keys:
         return self.dataTableGeneratedKeys
     
     def to_string(self):
-        print(len(self.objects))
+        #print(len(self.objects))
         for mib_obj in self.objects:
             mib_obj.to_string()
         self.dataTableGeneratedKeys.to_string()
