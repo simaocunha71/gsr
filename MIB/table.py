@@ -20,6 +20,12 @@ class DataTableGeneratedKeys:
         self.dataTableGeneratedKeys.pop(key_id)
         self.dataNumberOfValidKeys -= 1
 
+    def get_object(self,key_id):
+        if key_id in self.dataTableGeneratedKeys:
+            return self.dataTableGeneratedKeys[key_id]
+        else:
+            return None
+        
     def to_string(self):
         """Função que imprime a tabela"""
         #print(f"dataNumberOfValidKeys = {self.dataNumberOfValidKeys}")

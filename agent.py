@@ -114,6 +114,8 @@ class Agent:
         n_security_parameters_list=[]
 
         if is_keygen_request(pdu_received) == True:
+            #TODO: Ficará aqui a verificação se o cliente envia 2 pedidos com o mesmo ID num certo intervalo de tempo? (HINT: usar error_catch)
+
             # Criação das matrizes fm e Z (inicial)
             fm_matrix = utils.create_fm_matrix(F.min,F.max)
             Z = matrix.get_matrix(F.n_matrix, F.master_key, fm_matrix, S) 
@@ -134,9 +136,8 @@ class Agent:
             list_elements = pdu_received.get_instance_elements_list()
             list_elements.append(key_id_generated)
             
-            #TODO: Adicionar uma nova linha à MIB e preencher os valores da PDU de resposta (apenas os necessários (ou todos???))
             pdu_response = pdu.PDU(pdu_received.get_request_id(), primitive_type, 
-                                   len(list_elements), list_elements, # NOTE: Provisorio!
+                                   len(list_elements), list_elements,
                                    pdu_received.get_error_elements_size(), pdu_received.get_error_elements_list(),       # NOTE: Provisorio!
                                    security_level, n_security_parameters_number, n_security_parameters_list) 
 
@@ -144,13 +145,54 @@ class Agent:
 
         elif pdu_received.get_primitive_type() == 1: #get
             #Verificar se pedido está na MIB e verificar se acontecem os erros que estão no enunciado
-            pass
+            error_catch = False
+
+            index_list = pdu_received.get_instance_elements_list()
+            if (len(index_list) == 2):
+                value_to_send = mib.get_group(index_list[0]).get_object(index_list[1])
+            elif (len(index_list) == 4):
+                value_to_send = mib.get_group(index_list[0]).get_object(index_list[1]).get_object(index_list[2]).get_field(index_list[3])
+            else:
+                #TODO: Adicionar codigo de erro (numero de oids no comando invalido!!!)
+                error_catch = True
+                pass
+
+            if (error_catch == False):
+                index_list.append(value_to_send)
+
+
+            pdu_response = pdu.PDU(pdu_received.get_request_id(), primitive_type, 
+                                   len(index_list), index_list,
+                                   pdu_received.get_error_elements_size(), pdu_received.get_error_elements_list(),       # NOTE: Provisorio!
+                                   security_level, n_security_parameters_number, n_security_parameters_list) 
         elif pdu_received.get_primitive_type() == 2: #set
             #Verificar se pedido está na MIB e verificar se acontecem os erros que estão no enunciado
-            pass
+            error_catch = False
+
+            index_list = pdu_received.get_instance_elements_list()
+            if (len(index_list) == 2):
+                value_to_send = mib.get_group(index_list[0]).get_object(index_list[1]).set_field(index_list[1], index_list[-1])
+            elif (len(index_list) == 4):
+                value_to_send = mib.get_group(index_list[0]).get_object(index_list[1]).get_object(index_list[2]).set_field(index_list[3], index_list[-1])
+            else:
+                #TODO: Adicionar codigo de erro (numero de oids no comando invalido!!!)
+                error_catch = True
+                pass
+
+            if (error_catch == False):
+                index_list.append(value_to_send)
+
+
+            pdu_response = pdu.PDU(pdu_received.get_request_id(), primitive_type, 
+                                   len(index_list), index_list,
+                                   pdu_received.get_error_elements_size(), pdu_received.get_error_elements_list(),       # NOTE: Provisorio!
+                                   security_level, n_security_parameters_number, n_security_parameters_list) 
         else:
             #TODO: Criar erro de primitiva nao suportada e adicion+a-la à pdu de resposta
-            pass
+            pdu_response = pdu.PDU(pdu_received.get_request_id(), primitive_type, 
+                                   0, [1],
+                                   pdu_received.get_error_elements_size(), pdu_received.get_error_elements_list(),       # NOTE: Provisorio!
+                                   security_level, n_security_parameters_number, n_security_parameters_list) 
 
 
 

@@ -1,4 +1,3 @@
-"""Classe que cria contém todos os objetos do grupo System da MIB"""
 import re
 import MIB.object as obj
 import MIB.utils as utils
@@ -14,11 +13,11 @@ class MIB_System:
         self.updating_interval = updating_interval
         self.max_keys = max_keys
         self.ttl = ttl
-        self.objects = []
+        self.objects = {}  # Initialize as an empty dictionary instead of a list
         self.parse_objects(content)
 
     def parse_objects(self, content):
-        """Função para fazer o parsing dos objetos do grupo System"""
+        """Function to parse the objects of the System group"""
         matches = re.finditer(self.regex, content)
         for match in matches:
             object_type = match.group('object_type')
@@ -45,13 +44,16 @@ class MIB_System:
                 mib_obj = obj.MIB_Object(id_type, id_int, object_type, syntax, max_access, status, description, self.ttl)
 
             if mib_obj is not None: 
-                self.objects.append(mib_obj)
-    
-    def to_string(self):
-        """Função que representa o grupo System da MIB em string"""
-        #print(len(self.objects))
-        for mib_obj in self.objects:
-            mib_obj.to_string()
+                self.objects[object_type] = mib_obj  # Use object_type as the key in the dictionary
 
-#o = MIB_System("mib.mib")
-#o.to_string()
+    def get_object(self,oid_index):
+        if oid_index in self.objects:
+            return self.objects[oid_index]
+        else:
+            return None
+
+    def to_string(self):
+        """Function that represents the System group of the MIB as a string"""
+        for _, mib_obj in self.objects.items():
+            #print(object_type)
+            mib_obj.to_string()

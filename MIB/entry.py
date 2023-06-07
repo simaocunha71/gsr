@@ -55,8 +55,17 @@ class DataTableGeneratedKeysEntry:
         """Função que devolve um campo de uma entrada, dado um ID (id_int)"""
         for f in self.fields:
             if (f.id_int == index):
-                return f
+                return f.get_value()
         raise ValueError("Não existe campo com índice {}".format(index))
+    
+    def set_field(self, index, value):
+        """Função que define o valor de um campo de uma entrada, dado um ID (id_int)"""
+        for f in self.fields:
+            if f.id_int == index:
+                f.set_value(value)
+                return
+        raise ValueError("Não existe campo com índice {}".format(index))
+
 
 
 #d = DataTableGeneratedKeysEntry("mib.mib", 0)
