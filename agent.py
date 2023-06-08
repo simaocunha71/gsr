@@ -87,8 +87,6 @@ class Agent:
         """
         - Na criação de uma chave, saber que valor colocar no key_visibility (neste momento está a 2)
         - Impedir o manager de usar o mesmo id_request de X em X segundos (ver enunciado)
-        - Implementar comandos set (exceto o de criação de chave que ja está feito) e get
-        - No comando response, adicionar corretamente a lista de instancias (adicionar os novos valores dependendo das primitivas)
         - No comando response, adicionar corretamente a lista de erros (adicionar os novos valores dependendo das primitivas)
         - Nao escrever novas chaves se o nº de chaves já existentes for o maximo permitido
         - Arranjar forma de como cliente vai estar ligado para consultar o valor da chave
@@ -105,7 +103,6 @@ class Agent:
 
         primitive_type = 0 #É valor tomado pelas responses
 
-        #TODO: tratar dos instance_elements_list (e instance_elements_size)
         #TODO: tratar dos errors_elements_list (e errors_elements_size)
         
         #NOTE: No TP1, este valores vão ficar assim
@@ -144,14 +141,16 @@ class Agent:
             sock.sendto(pdu_response.encode(), addr)
 
         elif pdu_received.get_primitive_type() == 1: #get
-            #Verificar se pedido está na MIB e verificar se acontecem os erros que estão no enunciado
+            #TODO: Verificar se pedido está na MIB e verificar se acontecem os erros que estão no enunciado
             error_catch = False
 
             index_list = pdu_received.get_instance_elements_list()
             if (len(index_list) == 2):
-                value_to_send = mib.get_group(index_list[0]).get_object(index_list[1])
+                #Get para objetos do grupo system ou config
+                value_to_send = mib.get_group(index_list[0]).get_object(index_list[1]).get_value()
             elif (len(index_list) == 4):
-                value_to_send = mib.get_group(index_list[0]).get_object(index_list[1]).get_object(index_list[2]).get_field(index_list[3])
+                #Get para objetos do grupo data
+                value_to_send = mib.get_group(index_list[0]).get_table().get_object_entry(index_list[2]).get_field(index_list[3]).get_value()
             else:
                 #TODO: Adicionar codigo de erro (numero de oids no comando invalido!!!)
                 error_catch = True
@@ -160,33 +159,39 @@ class Agent:
             if (error_catch == False):
                 index_list.append(value_to_send)
 
-
             pdu_response = pdu.PDU(pdu_received.get_request_id(), primitive_type, 
                                    len(index_list), index_list,
                                    pdu_received.get_error_elements_size(), pdu_received.get_error_elements_list(),       # NOTE: Provisorio!
                                    security_level, n_security_parameters_number, n_security_parameters_list) 
+            
+            sock.sendto(pdu_response.encode(), addr)
         elif pdu_received.get_primitive_type() == 2: #set
-            #Verificar se pedido está na MIB e verificar se acontecem os erros que estão no enunciado
+            #TODO: Verificar se pedido está na MIB e verificar se acontecem os erros que estão no enunciado
             error_catch = False
 
             index_list = pdu_received.get_instance_elements_list()
-            if (len(index_list) == 2):
-                value_to_send = mib.get_group(index_list[0]).get_object(index_list[1]).set_field(index_list[1], index_list[-1])
-            elif (len(index_list) == 4):
-                value_to_send = mib.get_group(index_list[0]).get_object(index_list[1]).get_object(index_list[2]).set_field(index_list[3], index_list[-1])
+            if (len(index_list) == 3):
+                #Set aos grupos system e config
+                mib.get_group(index_list[0]).get_object(index_list[1]).set_value(index_list[-1])
+            elif (len(index_list) == 5):
+                #Set ao grupo data
+                mib.get_group(index_list[0]).get_table().get_object_entry(index_list[2]).get_field(index_list[3]).set_value(index_list[-1])
             else:
                 #TODO: Adicionar codigo de erro (numero de oids no comando invalido!!!)
                 error_catch = True
                 pass
 
-            if (error_catch == False):
-                index_list.append(value_to_send)
 
+            #mib.print_group(1)
+            #mib.print_group(2)
+            #mib.print_group(3)
 
             pdu_response = pdu.PDU(pdu_received.get_request_id(), primitive_type, 
                                    len(index_list), index_list,
                                    pdu_received.get_error_elements_size(), pdu_received.get_error_elements_list(),       # NOTE: Provisorio!
                                    security_level, n_security_parameters_number, n_security_parameters_list) 
+            
+            sock.sendto(pdu_response.encode(), addr)
         else:
             #TODO: Criar erro de primitiva nao suportada e adicion+a-la à pdu de resposta
             pdu_response = pdu.PDU(pdu_received.get_request_id(), primitive_type, 
@@ -194,6 +199,7 @@ class Agent:
                                    pdu_received.get_error_elements_size(), pdu_received.get_error_elements_list(),       # NOTE: Provisorio!
                                    security_level, n_security_parameters_number, n_security_parameters_list) 
 
+            sock.sendto(pdu_response.encode(), addr)
 
 
 

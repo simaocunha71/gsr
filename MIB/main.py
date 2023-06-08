@@ -20,7 +20,7 @@ class MIB:
         try:
             return self.dictionary.get(oid)
         except:
-            print("Erro em obter grupo - OID não existente na MIB")
+            print(f"Erro em obter grupo - OID {oid} não existente na MIB")
 
     def print_group(self, oid):
         """Imprime um grupo dado o seu OID"""
@@ -29,9 +29,9 @@ class MIB:
             if group is not None:
                 group.to_string()
             else:
-                print("Erro em obter grupo - OID não existente na MIB")
+                print(f"Erro em obter grupo - OID {oid} não existente na MIB")
         except:
-            print("Erro em obter grupo - OID não existente na MIB")
+            print(f"Erro em obter grupo - OID {oid} não existente na MIB")
 
 
 #mib = MIB("mib.mib")

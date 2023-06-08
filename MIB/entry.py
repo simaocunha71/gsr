@@ -40,7 +40,7 @@ class DataTableGeneratedKeysEntry:
             elif object_type == "keyVisibility":
                 entry = MIB_Object(id_type, id_int, object_type, syntax, max_access, status, description, keyVisibility)
 
-            self.fields[object_type] = entry
+            self.fields[int(id_int)] = entry
 
     def to_string(self):
         """Função que imprime uma entrada da tabela"""
@@ -49,19 +49,19 @@ class DataTableGeneratedKeysEntry:
 
     def prettier_to_string(self):
         """Função que imprime uma entrada da tabela de forma mais gráfica"""
-        print(f'{str(self.fields["keyId"].get_value())}          {self.fields["keyValue"].get_value()}          {self.fields["keyRequester"].get_value()}              {self.fields["keyExpirationDate"].get_value()}               {self.fields["keyExpirationTime"].get_value()}               {str(self.fields["keyVisibility"].get_value())}')
+        print(f'{str(self.fields[1].get_value())}          {self.fields[2].get_value()}          {self.fields[3].get_value()}              {self.fields[4].get_value()}               {self.fields[5].get_value()}               {str(self.fields[6].get_value())}')
 
     def get_field(self, index):
         """Função que devolve um campo de uma entrada, dado um ID (id_int)"""
-        for f in self.fields:
-            if (f.id_int == index):
-                return f.get_value()
-        raise ValueError("Não existe campo com índice {}".format(index))
+        if index in self.fields:
+            return self.fields[index]
+        else:
+            raise ValueError("Não existe campo com índice {}".format(index))
     
     def set_field(self, index, value):
         """Função que define o valor de um campo de uma entrada, dado um ID (id_int)"""
         for f in self.fields:
-            if f.id_int == index:
+            if f.get_id_int() == index:
                 f.set_value(value)
                 return
         raise ValueError("Não existe campo com índice {}".format(index))

@@ -44,7 +44,7 @@ class MIB_System:
                 mib_obj = obj.MIB_Object(id_type, id_int, object_type, syntax, max_access, status, description, self.ttl)
 
             if mib_obj is not None: 
-                self.objects[object_type] = mib_obj  # Use object_type as the key in the dictionary
+                self.objects[int(id_int)] = mib_obj
 
     def get_object(self,oid_index):
         if oid_index in self.objects:

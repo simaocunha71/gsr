@@ -36,7 +36,7 @@ class MIB_Config:
                 mib_obj = obj.MIB_Object(id_type, id_int, object_type, syntax, max_access, status, description, self.number_of_chars)
 
             if mib_obj is not None: 
-                self.objects[object_type] = mib_obj
+                self.objects[int(id_int)] = mib_obj
 
     def get_object(self,oid_index):
         if oid_index in self.objects:

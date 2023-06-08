@@ -12,7 +12,7 @@ python .\manager.py set 1 3.2.6.0
 
 - para alterar valor:
 python .\manager.py set 4 2.1 42
-python .\manager.py set 7 3.2.2.4 nova_password       -> 7 é o ID do pedido e 4 é o ID da chave (cujo valor foi recebido aquando a criação de chave)
+python .\manager.py set 7 3.2.4.2 nova_password       -> 7 é o ID do pedido e 4 é o ID da chave (cujo valor foi recebido aquando a criação de chave)
 
 - para obter valor:
 python .\manager.py get 12 2.1
@@ -49,6 +49,7 @@ if __name__ == "__main__":
                     sys.exit(0)
                 new_value = sys.argv[4]
                 primitive_type = 2
+                version_numbers.append(new_value)
         else:
             print("Invalid action")
             sys.exit(0)

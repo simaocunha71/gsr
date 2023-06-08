@@ -20,7 +20,7 @@ class DataTableGeneratedKeys:
         self.dataTableGeneratedKeys.pop(key_id)
         self.dataNumberOfValidKeys -= 1
 
-    def get_object(self,key_id):
+    def get_object_entry(self,key_id):
         if key_id in self.dataTableGeneratedKeys:
             return self.dataTableGeneratedKeys[key_id]
         else:
