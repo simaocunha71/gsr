@@ -32,13 +32,20 @@ def get_date_and_time_expiration(ttl):
     
     return (expiration_date_val, expiration_time_val)
 
-
-
+def send_error_PDU(pdu_received, title, socket, addr, primitive_type, security_level, n_security_parameters_number, n_security_parameters_list):
+    """Função que envia a PDU com o devido código de erro"""
+    errors_list = pdu_received.get_error_elements_list()
+    errors_list.append(title)
+    pdu_response = pdu.PDU(pdu_received.get_request_id(), primitive_type, 
+                           pdu_received.get_instance_elements_size(), pdu_received.get_instance_elements_list(),
+                           len(errors_list), errors_list,  
+                           security_level, n_security_parameters_number, n_security_parameters_list) 
+    socket.sendto(pdu_response.encode(), addr)
 
 def is_keygen_request(pdu_received):
-    """Verifica se o último número é 0 e se a lista de ids é maior do que 0 (true se se verificar, false caso contrário)"""
+    """Verifica se o último número é 0 e se a lista de ids é maior do que 0 e menor que 4 (true se se verificar, false caso contrário)"""
     instance_elements_list = pdu_received.get_instance_elements_list()
-    return instance_elements_list[-1] == 0 and len(instance_elements_list) > 0
+    return instance_elements_list[-1] == 0 and len(instance_elements_list) > 0 and len(instance_elements_list) <= 4
 
 
 def fill_initially_MIB(configurations):
@@ -62,9 +69,8 @@ def fill_initially_MIB(configurations):
 class Agent:
     def __init__(self):
         self.n_lock          = threading.Lock() # Lock para a variável "n_updated_times"
-        self.id_lock         = threading.Lock() # Lock para a variável "idRequest"
         self.n_updated_times = 0                # Nº de vezes que agente atualizou a matriz Z
-        self.bufferSize      = 4096             # Tamanho do buffer do socket entre agente e gestor
+        self.bufferSize      = 8192             # Tamanho do buffer do socket entre agente e gestor
         self.HOST            = 'localhost'      # Endereço do socket
         self.current_time    = None             # Início em segundos do funcionamento do agente (sem valor aqui)
         
@@ -86,9 +92,9 @@ class Agent:
         #TODO: 
         """
         - Na criação de uma chave, saber que valor colocar no key_visibility (neste momento está a 2)
-        - Impedir o manager de usar o mesmo id_request de X em X segundos (ver enunciado)
-        - No comando response, adicionar corretamente a lista de erros (adicionar os novos valores dependendo das primitivas)
-        - Nao escrever novas chaves se o nº de chaves já existentes for o maximo permitido
+        - Mudar o estado da entrada da tabela (quando chegar ao ttl), mudar o estado da chave (key_visibility)
+        - Remover entradas da tabela (que passam ao estado "expired"???) (DICA: ver o que fazer com os estados da chave)
+        - Impedir o manager de usar o mesmo id_request de X em X segundos (ver enunciado) [adicionar codigo de erro quando o servidor detetar uso de um mesmo id_request indevidamente]
         - Arranjar forma de como cliente vai estar ligado para consultar o valor da chave
             -> segundo o enunciado, cliente faz set() e depois faz get()
         """
@@ -102,107 +108,156 @@ class Agent:
         client_ip = addr[0]
 
         primitive_type = 0 #É valor tomado pelas responses
-
-        #TODO: tratar dos errors_elements_list (e errors_elements_size)
         
         #NOTE: No TP1, este valores vão ficar assim
         security_level=0
         n_security_parameters_number=0
         n_security_parameters_list=[]
 
-        if is_keygen_request(pdu_received) == True:
-            #TODO: Ficará aqui a verificação se o cliente envia 2 pedidos com o mesmo ID num certo intervalo de tempo? (HINT: usar error_catch)
+        if(pdu_received.get_instance_elements_size() <= 4): #Não permitir que manager use lista de oids de tamanho maior que 4
+            if is_keygen_request(pdu_received) == True:
+                #TODO: Ficará aqui a verificação se o cliente envia 2 pedidos com o mesmo ID num certo intervalo de tempo? (HINT: usar error_catch)
+                if mib.get_group(3).get_table().dataNumberOfValidKeys < int(F.n_max_entries): # Nº de entradas da tabela não excede o nº fixado no ficheiro de configuração
+                    # Criação das matrizes fm e Z (inicial)
+                    fm_matrix = utils.create_fm_matrix(F.min,F.max)
+                    Z = matrix.get_matrix(F.n_matrix, F.master_key, fm_matrix, S) 
 
-            # Criação das matrizes fm e Z (inicial)
-            fm_matrix = utils.create_fm_matrix(F.min,F.max)
-            Z = matrix.get_matrix(F.n_matrix, F.master_key, fm_matrix, S) 
+                    # Atualização de matrizes e geração da chave
+                    update_matrix.update_matrix_Z(F.n_matrix, Z, F.update_interval)
 
-            # Atualização de matrizes e geração da chave
-            update_matrix.update_matrix_Z(F.n_matrix, Z, F.update_interval)
+                    n_updated_times = self.get_n_inc_n_updated_times()
+                    line_index, col_index = utils.get_random_indexes(n_updated_times, Z, F.n_matrix)
 
-            n_updated_times = self.get_n_inc_n_updated_times()
-            line_index, col_index = utils.get_random_indexes(n_updated_times, Z, F.n_matrix)
+                    key = keygen.generate_key(Z, line_index, col_index, fm_matrix)
 
-            key = keygen.generate_key(Z, line_index, col_index, fm_matrix)
+                    date = get_date_and_time_expiration(int(F.max_store_time))
 
-            date = get_date_and_time_expiration(int(F.max_store_time))
+                    key_id_generated = mib.get_group(3).get_table().create_entry("MIB/mib.mib", key, client_ip, date[0], date[1], 2)#TODO: Corrigir este key_visibility=2 (o que fazer com ele???)
+                    #mib.to_string()
 
-            key_id_generated = mib.get_group(3).get_table().create_entry("MIB/mib.mib", key, client_ip, date[0], date[1], 2)
-            mib.to_string()
+                    list_elements = pdu_received.get_instance_elements_list()
+                    list_elements.append(key_id_generated)
 
-            list_elements = pdu_received.get_instance_elements_list()
-            list_elements.append(key_id_generated)
-            
-            pdu_response = pdu.PDU(pdu_received.get_request_id(), primitive_type, 
-                                   len(list_elements), list_elements,
-                                   pdu_received.get_error_elements_size(), pdu_received.get_error_elements_list(),       # NOTE: Provisorio!
-                                   security_level, n_security_parameters_number, n_security_parameters_list) 
+                    pdu_response = pdu.PDU(pdu_received.get_request_id(), primitive_type, 
+                                           len(list_elements), list_elements,
+                                           pdu_received.get_error_elements_size(), pdu_received.get_error_elements_list(),
+                                           security_level, n_security_parameters_number, n_security_parameters_list) 
 
-            sock.sendto(pdu_response.encode(), addr)
+                    sock.sendto(pdu_response.encode(), addr)
+                else:
+                    """Erro #1: Pedido de criação de chave mas MIB não suporta a adição de mais chaves"""
+                    send_error_PDU(pdu_received, "MIB FULL", sock, addr, primitive_type,
+                                   security_level, n_security_parameters_number, n_security_parameters_list)
 
-        elif pdu_received.get_primitive_type() == 1: #get
-            #TODO: Verificar se pedido está na MIB e verificar se acontecem os erros que estão no enunciado
-            error_catch = False
+            elif pdu_received.get_primitive_type() == 1: #get
+                value_to_send = ""
+                index_list = pdu_received.get_instance_elements_list()
+                try:
+                    group_got = mib.get_group(index_list[0])
+                except Exception as _:
+                    """Erro #2: Grupo acedido da MIB não existe"""
+                    send_error_PDU(pdu_received, "NON EXISTENT GROUP", sock, addr, primitive_type,
+                                   security_level, n_security_parameters_number, n_security_parameters_list)
 
-            index_list = pdu_received.get_instance_elements_list()
-            if (len(index_list) == 2):
-                #Get para objetos do grupo system ou config
-                value_to_send = mib.get_group(index_list[0]).get_object(index_list[1]).get_value()
-            elif (len(index_list) == 4):
-                #Get para objetos do grupo data
-                value_to_send = mib.get_group(index_list[0]).get_table().get_object_entry(index_list[2]).get_field(index_list[3]).get_value()
-            else:
-                #TODO: Adicionar codigo de erro (numero de oids no comando invalido!!!)
-                error_catch = True
-                pass
+                if (len(index_list) == 2):
+                    #Get para objetos do grupo system ou config
+                    try:
+                        value_to_send = group_got.get_object(index_list[1]).get_value()
+                    except Exception as _:
+                        """Erro #3: Objeto não existe no grupo System ou Config"""
+                        send_error_PDU(pdu_received, "NON EXISTENT VALUE (Sys/Conf)", sock, addr, primitive_type,
+                                       security_level, n_security_parameters_number, n_security_parameters_list)
+                  
+                elif (len(index_list) == 4):
+                    #Get para objetos do grupo data
+                    try:
+                        entry_got = group_got.get_table().get_object_entry(index_list[2])
+                    except Exception as _:
+                        """Erro #4: Entrada da MIB a aceder não existe"""
+                        send_error_PDU(pdu_received, "NON EXISTENT ENTRY", sock, addr, primitive_type,
+                                       security_level, n_security_parameters_number, n_security_parameters_list)
+      
+                    try:
+                        value_to_send = entry_got.get_field(index_list[3]).get_value()
+                    except Exception as _:
+                        """Erro #5: Campo da entrada acedida na tabela não existe"""
+                        send_error_PDU(pdu_received, "NON EXISTENT OBJECT IN ENTRY", sock, addr, primitive_type,
+                                       security_level, n_security_parameters_number, n_security_parameters_list)                    
 
-            if (error_catch == False):
+                #Não foi detetado erro nenhum
                 index_list.append(value_to_send)
 
-            pdu_response = pdu.PDU(pdu_received.get_request_id(), primitive_type, 
-                                   len(index_list), index_list,
-                                   pdu_received.get_error_elements_size(), pdu_received.get_error_elements_list(),       # NOTE: Provisorio!
-                                   security_level, n_security_parameters_number, n_security_parameters_list) 
-            
-            sock.sendto(pdu_response.encode(), addr)
-        elif pdu_received.get_primitive_type() == 2: #set
-            #TODO: Verificar se pedido está na MIB e verificar se acontecem os erros que estão no enunciado
-            error_catch = False
+                pdu_response = pdu.PDU(pdu_received.get_request_id(), primitive_type, 
+                                       len(index_list), index_list,
+                                       pdu_received.get_error_elements_size(), pdu_received.get_error_elements_list(),
+                                       security_level, n_security_parameters_number, n_security_parameters_list) 
+                #mib.to_string()
 
-            index_list = pdu_received.get_instance_elements_list()
-            if (len(index_list) == 3):
-                #Set aos grupos system e config
-                mib.get_group(index_list[0]).get_object(index_list[1]).set_value(index_list[-1])
-            elif (len(index_list) == 5):
-                #Set ao grupo data
-                mib.get_group(index_list[0]).get_table().get_object_entry(index_list[2]).get_field(index_list[3]).set_value(index_list[-1])
+                sock.sendto(pdu_response.encode(), addr)
+            elif pdu_received.get_primitive_type() == 2: #set
+                value_to_send = ""
+                index_list = pdu_received.get_instance_elements_list()
+                try:
+                    group_got = mib.get_group(index_list[0])
+                except Exception as _:
+                    """Erro #2: Grupo acedido da MIB não existe"""
+                    send_error_PDU(pdu_received, "NON EXISTENT GROUP", sock, addr, primitive_type,
+                                   security_level, n_security_parameters_number, n_security_parameters_list)
+
+                if (len(index_list) == 3):
+                    #Set aos grupos system e config
+                    try:
+                        object_got = group_got.get_object(index_list[1])
+                    except Exception as _:
+                        """Erro #3: Objeto não existe no grupo System ou Config"""
+                        send_error_PDU(pdu_received, "NON EXISTENT VALUE (Sys/Conf)", sock, addr, primitive_type,
+                                       security_level, n_security_parameters_number, n_security_parameters_list)
+
+                    try:
+                        value_to_send = object_got.set_value(index_list[-1])
+                    except Exception as _:
+                        """Erro #6: Valor a adicionar não é do mesmo tipo que o estipulado para o objeto"""
+                        send_error_PDU(pdu_received, "VALUE WITH DIFFERENT TYPE", sock, addr, primitive_type,
+                                       security_level, n_security_parameters_number, n_security_parameters_list)
+
+
+                elif (len(index_list) == 5):
+                    #Set ao grupo data
+                    try:
+                        entry_got = group_got.get_table().get_object_entry(index_list[2])
+                    except Exception as _:
+                        """Erro #4: Entrada da MIB a aceder não existe"""
+                        send_error_PDU(pdu_received, "NON EXISTENT ENTRY", sock, addr, primitive_type,
+                                       security_level, n_security_parameters_number, n_security_parameters_list) 
+
+                    try:
+                        field_got = entry_got.get_field(index_list[3])
+                    except Exception as _:
+                        """Erro #5: Campo da entrada acedida na tabela não existe"""
+                        send_error_PDU(pdu_received, "NON EXISTENT OBJECT IN ENTRY", sock, addr, primitive_type,
+                                       security_level, n_security_parameters_number, n_security_parameters_list)
+  
+                    try:
+                        value_to_send = field_got.set_value(index_list[-1])
+                    except Exception as _:
+                        """Erro #6: Valor a adicionar não é do mesmo tipo que o estipulado para o objeto"""
+                        send_error_PDU(pdu_received, "VALUE WITH DIFFERENT TYPE", sock, addr, primitive_type,
+                                       security_level, n_security_parameters_number, n_security_parameters_list)
+
+                #Não foi detetado erro nenhum
+                pdu_response = pdu.PDU(pdu_received.get_request_id(), primitive_type, 
+                                       len(index_list), index_list,
+                                       pdu_received.get_error_elements_size(), pdu_received.get_error_elements_list(),
+                                       security_level, n_security_parameters_number, n_security_parameters_list) 
+                mib.to_string()
+                sock.sendto(pdu_response.encode(), addr)
             else:
-                #TODO: Adicionar codigo de erro (numero de oids no comando invalido!!!)
-                error_catch = True
-                pass
+                """Erro #7: Primitiva efetuada não corresponde a get ou set"""
+                send_error_PDU(pdu_received, "PRIMITIVE NOT SUPPORTED", sock, addr, primitive_type,security_level, n_security_parameters_number, n_security_parameters_list)
 
-
-            #mib.print_group(1)
-            #mib.print_group(2)
-            #mib.print_group(3)
-
-            pdu_response = pdu.PDU(pdu_received.get_request_id(), primitive_type, 
-                                   len(index_list), index_list,
-                                   pdu_received.get_error_elements_size(), pdu_received.get_error_elements_list(),       # NOTE: Provisorio!
-                                   security_level, n_security_parameters_number, n_security_parameters_list) 
-            
-            sock.sendto(pdu_response.encode(), addr)
         else:
-            #TODO: Criar erro de primitiva nao suportada e adicion+a-la à pdu de resposta
-            pdu_response = pdu.PDU(pdu_received.get_request_id(), primitive_type, 
-                                   0, [1],
-                                   pdu_received.get_error_elements_size(), pdu_received.get_error_elements_list(),       # NOTE: Provisorio!
-                                   security_level, n_security_parameters_number, n_security_parameters_list) 
-
-            sock.sendto(pdu_response.encode(), addr)
-
-
-
+            """Erro #8: Numero de OIDS incorretos"""
+            send_error_PDU(pdu_received, "OIDs len INCORRECT", sock, addr, primitive_type,security_level, n_security_parameters_number, n_security_parameters_list)
 
 
 

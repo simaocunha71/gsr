@@ -49,7 +49,7 @@ class MIB_Object:
         return self.value
 
     
-    """Setters a classe Object"""
+    """Setters da classe Object"""
     def set_id_type(self, id_type):
         self.id_type = id_type
 
@@ -72,4 +72,10 @@ class MIB_Object:
         self.description = description
 
     def set_value(self, value):
-        self.value = value
+        print(self.get_syntax())
+        if value.isdigit() and self.get_syntax() == "INTEGER":
+            self.value = int(value)
+        elif self.get_syntax() == "OCTET STRING":
+            self.value = str(value)
+        else:
+            raise ValueError("Valor inválido para o tipo de objeto")

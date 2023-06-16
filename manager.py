@@ -24,7 +24,7 @@ class Manager:
     def __init__(self):
         self.AGENT_HOST  = 'localhost' # Endereço do socket
         self.AGENT_PORT  = 2048        # Porta de comunicação (a mesma que a do agente)
-        self.BUFFER_SIZE = 4096        # Buffer do socket para a comunicação
+        self.BUFFER_SIZE = 8192        # Buffer do socket para a comunicação
 
 
 if __name__ == "__main__":

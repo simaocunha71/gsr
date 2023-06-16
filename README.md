@@ -16,6 +16,16 @@ Relatório Overleaf: https://www.overleaf.com/project/64392ff091ff419dc81f0ab8
 * *manager.py*: Ficheiro que representa o manager SNMP
 * *model/*: Diretoria com a classe *configurations* e *pdu*
 * *keys/*: Diretoria responsável pela criação e atualização de matrizes (*matrix.py* e *update_matrix.py*) e geração de chaves (*main.py*)
-* *comunication/*: Comunicação SNMPkeyShare - comandos get(), set() e response()
+* *comunication/*: PDU usada no TP
 * *MIB/*: MIB SNMPkeyShare
 * *docs/*: Documentos necessários para o TP (enunciado, ...)
+
+#### Códigos de erro
+* Erro #1: Pedido de criação de chave mas MIB não suporta a adição de mais chaves
+* Erro #2: Grupo acedido da MIB não existe
+* Erro #3: Objeto não existe no grupo System ou Config
+* Erro #4: Entrada da MIB a aceder não existe
+* Erro #5: Campo da entrada acedida na tabela não existe
+* Erro #6: Valor a adicionar não é do mesmo tipo que o estipulado para o objeto
+* Erro #7: Primitiva efetuada não corresponde a get ou set
+* Erro #8: Número de OIDS incorretos
