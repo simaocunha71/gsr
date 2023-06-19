@@ -29,3 +29,6 @@ Relatório Overleaf: https://www.overleaf.com/project/64392ff091ff419dc81f0ab8
 * Erro #6: Valor a adicionar não é do mesmo tipo que o estipulado para o objeto
 * Erro #7: Primitiva efetuada não corresponde a get ou set
 * Erro #8: Número de OIDS incorretos
+* Erro #9: Manager não pode enviar o mesmo request id dentro de V segundos
+
+Link util para encriptação em Python: https://www.geeksforgeeks.org/how-to-encrypt-and-decrypt-strings-in-python/
