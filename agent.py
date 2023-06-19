@@ -97,9 +97,6 @@ class Agent:
         - Na criação de uma chave, saber que valor colocar no key_visibility (neste momento está a 2)
         - Mudar o estado da entrada da tabela (quando chegar ao ttl), mudar o estado da chave (key_visibility)
         - Remover entradas da tabela (que passam ao estado "expired"???) (DICA: ver o que fazer com os estados da chave)
-        - Impedir o manager de usar o mesmo id_request de X em X segundos (ver enunciado) [adicionar codigo de erro quando o servidor detetar uso de um mesmo id_request indevidamente]
-        - Arranjar forma de como cliente vai estar ligado para consultar o valor da chave
-            -> segundo o enunciado, cliente faz set() e depois faz get()
         """
 
         # Imprime a mensagem recebida
@@ -120,12 +117,7 @@ class Agent:
         client_password = pdu_received.get_n_security_parameters_list()[0]
 
         if(client_registry.can_send_same_requestID(client_password, pdu_received.get_request_id(), F.max_store_time) == True):
-            #print("Depois de incrementar: " + str(self.client_id_served))
-            #print("Antes")
-            #client_registry.to_string()
             client_registry.add_client(client_ip, F.port, pdu_received.get_request_id(), client_password)
-            #print("Depois")
-            #client_registry.to_string()
             if(pdu_received.get_instance_elements_size() <= 4): #Não permitir que manager use lista de oids de tamanho maior que 4
                 if is_keygen_request(pdu_received) == True:
                     if mib.get_group(3).get_table().dataNumberOfValidKeys < int(F.n_max_entries): # Nº de entradas da tabela não excede o nº fixado no ficheiro de configuração
