@@ -233,8 +233,7 @@ class Agent:
         else:
             """Erro #9: Manager não pode enviar o mesmo request id dentro de V segundos"""
             send_error_PDU(pdu_received, "SAME REQUEST_ID SENT IN V SECONDS", sock, addr, primitive_type,security_level, n_security_parameters_number, n_security_parameters_list)
-        mib.to_string()
-
+        #mib.to_string()
 if __name__ == "__main__":
     print("----------Agent started----------")
 
