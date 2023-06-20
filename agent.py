@@ -11,27 +11,21 @@ import socket
 import threading
 import communication.pdu as pdu
 import communication.client_registry as client_registry
-
 import datetime
 
 def get_date_and_time_expiration(ttl):
+    """Função que calcula o expiration_date e o expiration_time de cada entrada da tabela"""
     current_datetime = datetime.datetime.now()
-    
     expiration_date = current_datetime + datetime.timedelta(seconds=ttl)
     
-    # Obter os componentes de data e hora
-    YY = expiration_date.year 
-    MM = expiration_date.month
-    DD = expiration_date.day
-    HH = expiration_date.hour
-    MM = expiration_date.minute
-    SS = expiration_date.second
+    # Calcular o valor em segundos para expiration_date
+    expiration_date_val = int(expiration_date.timestamp())
     
-    # Calcular os valores no formato desejado
-    expiration_date_val = YY * 104 + MM * 102 + DD
-    expiration_time_val = HH * 104 + MM * 102 + SS
+    # Calcular o valor em segundos para expiration_time
+    expiration_time_val = int((expiration_date - expiration_date.replace(hour=0, minute=0, second=0)).total_seconds())
     
     return (expiration_date_val, expiration_time_val)
+
 
 def send_error_PDU(pdu_received, title, socket, addr, primitive_type, security_level, n_security_parameters_number, n_security_parameters_list):
     """Função que envia a PDU com o devido código de erro"""
@@ -94,8 +88,6 @@ class Agent:
 
         #TODO: 
         """
-        - Na criação de uma chave, saber que valor colocar no key_visibility (neste momento está a 2)
-        - Mudar o estado da entrada da tabela (quando chegar ao ttl), mudar o estado da chave (key_visibility)
         - Remover entradas da tabela (que passam ao estado "expired"???) (DICA: ver o que fazer com os estados da chave)
         """
 
@@ -120,7 +112,7 @@ class Agent:
             client_registry.add_client(client_ip, F.port, pdu_received.get_request_id(), client_password)
             if(pdu_received.get_instance_elements_size() <= 4): #Não permitir que manager use lista de oids de tamanho maior que 4
                 if is_keygen_request(pdu_received) == True:
-                    if mib.get_group(3).get_table().dataNumberOfValidKeys < int(F.n_max_entries): # Nº de entradas da tabela não excede o nº fixado no ficheiro de configuração
+                    if int(mib.get_group(3).get_table().dataNumberOfValidKeys) < int(F.n_max_entries): # Nº de entradas da tabela não excede o nº fixado no ficheiro de configuração
                         # Criação das matrizes fm e Z (inicial)
                         fm_matrix = utils.create_fm_matrix(F.min,F.max)
                         Z = matrix.get_matrix(F.n_matrix, F.master_key, fm_matrix, S) 
@@ -130,7 +122,7 @@ class Agent:
                         line_index, col_index = utils.get_random_indexes(n_updated_times, Z, F.n_matrix)
                         key = keygen.generate_key(Z, line_index, col_index, fm_matrix)
                         date = get_date_and_time_expiration(int(F.max_store_time))
-                        key_id_generated = mib.get_group(3).get_table().create_entry("MIB/mib.mib", key, client_ip, date[0], date[1], 2)#TODO: Corrigir este key_visibility=2 (o que fazer com ele???)
+                        key_id_generated = mib.get_group(3).get_table().create_entry("MIB/mib.mib", key, client_ip, date[0], date[1], 0)
                         #mib.to_string()
                         list_elements = pdu_received.get_instance_elements_list()
                         list_elements.append(key_id_generated)
@@ -241,7 +233,7 @@ class Agent:
         else:
             """Erro #9: Manager não pode enviar o mesmo request id dentro de V segundos"""
             send_error_PDU(pdu_received, "SAME REQUEST_ID SENT IN V SECONDS", sock, addr, primitive_type,security_level, n_security_parameters_number, n_security_parameters_list)
-
+        mib.to_string()
 
 if __name__ == "__main__":
     print("----------Agent started----------")

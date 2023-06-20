@@ -25,13 +25,14 @@ class MIB_Keys:
                            None)
         ])
 
+    def get_table(self):
+        self.update_n_valid_keys(self.objects)
+        return self.dataTableGeneratedKeys
+    
     def update_n_valid_keys(self, objects):
         new_val = self.dataTableGeneratedKeys.dataNumberOfValidKeys + 1
         return objects[0].set_value(new_val) 
     
-    def get_table(self):
-        self.update_n_valid_keys(self.objects)
-        return self.dataTableGeneratedKeys
     
     def to_string(self):
         #print(len(self.objects))
