@@ -71,6 +71,3 @@ class Configurations:
         print(f"V: {self.max_store_time}")
         print(f"X: {str(self.n_max_entries)}")
         print(f"Port: {str(self.port)}")
-
-#c = Configurations("../config.conf")
-#c.print_configurations()

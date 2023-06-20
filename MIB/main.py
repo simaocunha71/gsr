@@ -32,7 +32,3 @@ class MIB:
                 print(f"Erro em obter grupo - OID {oid} não existente na MIB")
         except:
             print(f"Erro em obter grupo - OID {oid} não existente na MIB")
-
-
-#mib = MIB("mib.mib")
-#mib.print_group(1)

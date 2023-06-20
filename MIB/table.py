@@ -1,5 +1,4 @@
 from MIB.entry import DataTableGeneratedKeysEntry
-import time
 import datetime
 
 class DataTableGeneratedKeys:
@@ -11,7 +10,8 @@ class DataTableGeneratedKeys:
     
 
     def create_entry(self, filename, keyValue, keyRequester, keyExpirationDate, keyExpirationTime, keyVisibility):
-        # Verificar se há entradas expiradas
+        """Função que cria uma entrada na tabela.
+        Além disso, remove todas as entradas que expiraram"""
         self.remove_expired_entries()
 
         current_datetime = datetime.datetime.now()
@@ -26,17 +26,17 @@ class DataTableGeneratedKeys:
 
         
     def remove_expired_entries(self):
-        expired_entries = []
+        """Função que remove todas as entradas expiradas (i.e. cujo timestamp atingiu keyExpirationTime)"""
+        expired_entries = [] #Aqui serão guardadas todas as entradas expiradas
 
         for key_id, (entry, _) in self.dataTableGeneratedKeys.items():
             current_datetime = datetime.datetime.now()
             timestamp = int((current_datetime - current_datetime.replace(hour=0, minute=0, second=0)).total_seconds())
 
-            #print(f"timestamp = {timestamp}")
-            #print(f"int(entry.get_field(5).get_value()) = {int(entry.get_field(5).get_value())}")
             if timestamp > int(entry.get_field(5).get_value()):
                 expired_entries.append(key_id)
 
+        #Remoção de todas as entradas expiradas
         for key_id in expired_entries:
             del self.dataTableGeneratedKeys[key_id]
             self.dataNumberOfValidKeys -= 1

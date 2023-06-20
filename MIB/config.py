@@ -8,14 +8,14 @@ class MIB_Config:
     def __init__(self, filename, master_key, fst_ascii_code, number_of_chars):
         with open(filename, 'r') as file:
             content = file.read().replace('\n', '')
-        self.objects = {}  # Initialize as an empty dictionary instead of a list
+        self.objects = {}
         self.master_key = master_key
         self.fst_ascii_code = fst_ascii_code
         self.number_of_chars = number_of_chars
         self.parse_objects(content)
 
     def parse_objects(self, content):
-        """Function to parse the objects of the Config group"""
+        """Função que faz parse dos objetos do grupo Config"""
         matches = re.finditer(self.regex, content)
         for match in matches:
             object_type = match.group('object_type')
@@ -39,13 +39,14 @@ class MIB_Config:
                 self.objects[int(id_int)] = mib_obj
 
     def get_object(self,oid_index):
+        """Função que devolve um objeto dado um OID"""
         if oid_index in self.objects:
             return self.objects[oid_index]
         else:
             return None
         
     def to_string(self):
-        """Function that represents the Config group of the MIB as a string"""
+        """Função que imprime o grupo Config"""
         for object_type, mib_obj in self.objects.items():
             print(object_type)
             mib_obj.to_string()

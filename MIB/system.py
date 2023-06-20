@@ -13,11 +13,11 @@ class MIB_System:
         self.updating_interval = updating_interval
         self.max_keys = max_keys
         self.ttl = ttl
-        self.objects = {}  # Initialize as an empty dictionary instead of a list
+        self.objects = {}
         self.parse_objects(content)
 
     def parse_objects(self, content):
-        """Function to parse the objects of the System group"""
+        """Função para dar parse aos objetos do grupo System"""
         matches = re.finditer(self.regex, content)
         for match in matches:
             object_type = match.group('object_type')
@@ -47,13 +47,14 @@ class MIB_System:
                 self.objects[int(id_int)] = mib_obj
 
     def get_object(self,oid_index):
+        """Função que devolve um objeto do grupo System"""
         if oid_index in self.objects:
             return self.objects[oid_index]
         else:
             return None
 
     def to_string(self):
-        """Function that represents the System group of the MIB as a string"""
+        """Função que imprime o grupo System"""
         for _, mib_obj in self.objects.items():
             #print(object_type)
             mib_obj.to_string()

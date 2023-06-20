@@ -72,6 +72,7 @@ class MIB_Object:
         self.description = description
 
     def set_value(self, value):
+        """Função que dá set ao valor guardado por esse objeto, apenas se o novo valor for do tipo definido para esse objeto"""
         if str(value).isdigit() and self.get_syntax() == "INTEGER":
             self.value = int(value)
         elif self.get_syntax() == "OCTET STRING":

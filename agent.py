@@ -28,7 +28,7 @@ def get_date_and_time_expiration(ttl):
 
 
 def send_error_PDU(pdu_received, title, socket, addr, primitive_type, security_level, n_security_parameters_number, n_security_parameters_list):
-    """Função que envia a PDU com o devido código de erro"""
+    """Função que envia a PDU com o devido código de erro (codigo que está representado numa string ilustrativa)"""
     errors_list = pdu_received.get_error_elements_list()
     errors_list.append(title)
     pdu_response = pdu.PDU(pdu_received.get_request_id(), primitive_type, 
@@ -38,13 +38,14 @@ def send_error_PDU(pdu_received, title, socket, addr, primitive_type, security_l
     socket.sendto(pdu_response.encode(), addr)
 
 def is_keygen_request(pdu_received):
-    """Verifica se o último número é 0 e se a lista de ids é maior do que 0 e menor que 4 (true se se verificar, false caso contrário)"""
+    """Verifica se se trata de um pedido de geração de chaves:
+     -> último número é 0 e se a lista de ids é maior do que 0 e menor que 4 (true se se verificar, false caso contrário)"""
     instance_elements_list = pdu_received.get_instance_elements_list()
     return instance_elements_list[-1] == 0 and len(instance_elements_list) > 0 and len(instance_elements_list) <= 4
 
 
 def fill_initially_MIB(configurations):
-    """Cria e preenche o MIB com chaves e valores aleatórios"""
+    """Cria e preenche o MIB com os valores correspondentes para cada grupo da MIB"""
     # System content
     K = configurations.get_n_matrix()
     updating_interval = configurations.get_update_interval()
@@ -58,7 +59,6 @@ def fill_initially_MIB(configurations):
     number_of_chars = _max - fst_ascii_code + 1
 
     return main.MIB("MIB/mib.mib", K, updating_interval, max_keys, ttl, master_key, fst_ascii_code, number_of_chars)
-
 
 
 class Agent:
@@ -86,14 +86,8 @@ class Agent:
     def handle_request(self, sock, data, addr, F, mib, client_registry):
         """Função que trata do pedido de um manager"""
 
-        #TODO: 
-        """
-        - Remover entradas da tabela (que passam ao estado "expired"???) (DICA: ver o que fazer com os estados da chave)
-        """
-
-        # Imprime a mensagem recebida
         pdu_received = pdu.PDU.decode(data)
-        #pdu_received.to_string()
+        #pdu_received.to_string() #NOTE: Caso queiramos observar o que o agente recebeu do manager, retirar comentário à linha
 
         S = Agent.get_timestamp(self.current_time)
 
@@ -101,29 +95,46 @@ class Agent:
 
         primitive_type = 0 #É valor tomado pelas responses
 
+        #####################################################################################
         #NOTE: No TP1, este valores vão ficar assim
         security_level=0
         n_security_parameters_number=0
         n_security_parameters_list=[]
+        #####################################################################################
 
+        #Obtenção da password enviada pelo cliente através do campo da PDU n_security_parameters_list
         client_password = pdu_received.get_n_security_parameters_list()[0]
 
+        #Verificação se o cliente que enviou um pedido enviou um request_id de um outro pedido seu há menos de max_store_time segundos
         if(client_registry.can_send_same_requestID(client_password, pdu_received.get_request_id(), F.max_store_time) == True):
+
+            #Nesta fase, o cliente é válido e será registado ao ficheiro de clientes
             client_registry.add_client(client_ip, F.port, pdu_received.get_request_id(), client_password)
-            if(pdu_received.get_instance_elements_size() <= 4): #Não permitir que manager use lista de oids de tamanho maior que 4
+
+            #Não permitir que manager use lista de oids de tamanho maior que 4
+            if(pdu_received.get_instance_elements_size() <= 4): 
+
+                #Verificação de pedido de geração de chave
                 if is_keygen_request(pdu_received) == True:
-                    if int(mib.get_group(3).get_table().dataNumberOfValidKeys) < int(F.n_max_entries): # Nº de entradas da tabela não excede o nº fixado no ficheiro de configuração
-                        # Criação das matrizes fm e Z (inicial)
+
+                    #Verificação se nº de entradas da tabela não excede o nº fixado no ficheiro de configuração
+                    if int(mib.get_group(3).get_table().dataNumberOfValidKeys) < int(F.n_max_entries): 
+
+                        #Criação das matrizes fm e Z (inicial)
                         fm_matrix = utils.create_fm_matrix(F.min,F.max)
                         Z = matrix.get_matrix(F.n_matrix, F.master_key, fm_matrix, S) 
-                        # Atualização de matrizes e geração da chave
+
+                        #Atualização de matrizes e geração da chave
                         update_matrix.update_matrix_Z(F.n_matrix, Z, F.update_interval)
                         n_updated_times = self.get_n_inc_n_updated_times()
                         line_index, col_index = utils.get_random_indexes(n_updated_times, Z, F.n_matrix)
                         key = keygen.generate_key(Z, line_index, col_index, fm_matrix)
                         date = get_date_and_time_expiration(int(F.max_store_time))
+                        
+                        #Criação de uma nova entrada na tabela com a chave gerada
                         key_id_generated = mib.get_group(3).get_table().create_entry("MIB/mib.mib", key, client_ip, date[0], date[1], 0)
-                        #mib.to_string()
+
+                        #Envio da resposta ao cliente: adicionará o ID da chave à instance_elements_list da PDU de resposta
                         list_elements = pdu_received.get_instance_elements_list()
                         list_elements.append(key_id_generated)
                         pdu_response = pdu.PDU(pdu_received.get_request_id(), primitive_type, 
@@ -135,7 +146,11 @@ class Agent:
                         """Erro #1: Pedido de criação de chave mas MIB não suporta a adição de mais chaves"""
                         send_error_PDU(pdu_received, "MIB FULL", sock, addr, primitive_type,
                                        security_level, n_security_parameters_number, n_security_parameters_list)
-                elif pdu_received.get_primitive_type() == 1: #get
+                
+                #Verificação de pedido de get
+                elif pdu_received.get_primitive_type() == 1:
+                    #Aqui far-se-á acessos sucessivos a estruturas de dados da MIB.
+                    #Caso haja algum erro, é imediatamente enviado uma resposta com o referido erro (ignorando eventuais outros erros)
                     value_to_send = ""
                     index_list = pdu_received.get_instance_elements_list()
                     try:
@@ -144,6 +159,7 @@ class Agent:
                         """Erro #2: Grupo acedido da MIB não existe"""
                         send_error_PDU(pdu_received, "NON EXISTENT GROUP", sock, addr, primitive_type,
                                        security_level, n_security_parameters_number, n_security_parameters_list)
+                        
                     if (len(index_list) == 2):
                         #Get para objetos do grupo system ou config
                         try:
@@ -152,6 +168,7 @@ class Agent:
                             """Erro #3: Objeto não existe no grupo System ou Config"""
                             send_error_PDU(pdu_received, "NON EXISTENT VALUE (Sys/Conf)", sock, addr, primitive_type,
                                            security_level, n_security_parameters_number, n_security_parameters_list)
+                            
                     elif (len(index_list) == 4):
                         #Get para objetos do grupo data
                         try:
@@ -165,16 +182,20 @@ class Agent:
                         except Exception as _:
                             """Erro #5: Campo da entrada acedida na tabela não existe"""
                             send_error_PDU(pdu_received, "NON EXISTENT OBJECT IN ENTRY", sock, addr, primitive_type,
-                                           security_level, n_security_parameters_number, n_security_parameters_list)                    
-                    #Não foi detetado erro nenhum
+                                           security_level, n_security_parameters_number, n_security_parameters_list)    
+                                            
+                    #Não foi detetado erro nenhum: adicionará o valor que queremos saber à instance_elements_list da PDU de resposta e envia resposta ao manager
                     index_list.append(value_to_send)
                     pdu_response = pdu.PDU(pdu_received.get_request_id(), primitive_type, 
                                            len(index_list), index_list,
                                            pdu_received.get_error_elements_size(), pdu_received.get_error_elements_list(),
                                            security_level, n_security_parameters_number, n_security_parameters_list) 
-                    #mib.to_string()
                     sock.sendto(pdu_response.encode(), addr)
-                elif pdu_received.get_primitive_type() == 2: #set
+                
+                #Verificação de pedido de set
+                elif pdu_received.get_primitive_type() == 2:
+                    #Aqui far-se-á acessos sucessivos a estruturas de dados da MIB.
+                    #Caso haja algum erro, é imediatamente enviado uma resposta com o referido erro (ignorando eventuais outros erros)
                     value_to_send = ""
                     index_list = pdu_received.get_instance_elements_list()
                     try:
@@ -217,7 +238,8 @@ class Agent:
                             """Erro #6: Valor a adicionar não é do mesmo tipo que o estipulado para o objeto"""
                             send_error_PDU(pdu_received, "VALUE WITH DIFFERENT TYPE", sock, addr, primitive_type,
                                            security_level, n_security_parameters_number, n_security_parameters_list)
-                    #Não foi detetado erro nenhum
+                            
+                    #Não foi detetado erro nenhum: a lista instance_elements_list da PDU de resposta ficará igual e envia resposta ao manager
                     pdu_response = pdu.PDU(pdu_received.get_request_id(), primitive_type, 
                                            len(index_list), index_list,
                                            pdu_received.get_error_elements_size(), pdu_received.get_error_elements_list(),
@@ -234,6 +256,8 @@ class Agent:
             """Erro #9: Manager não pode enviar o mesmo request id dentro de V segundos"""
             send_error_PDU(pdu_received, "SAME REQUEST_ID SENT IN V SECONDS", sock, addr, primitive_type,security_level, n_security_parameters_number, n_security_parameters_list)
         mib.to_string()
+
+
 if __name__ == "__main__":
     print("----------Agent started----------")
 
@@ -242,6 +266,7 @@ if __name__ == "__main__":
     # Leitura do ficheiro
     F = configurations.Configurations("config.conf") 
 
+    # Povoa os grupos da MIB
     mib = fill_initially_MIB(F)
 
     # Criação do Socket UDP
@@ -252,6 +277,7 @@ if __name__ == "__main__":
 
     print(f"Servidor UDP ouvindo em {ag.HOST}:{F.port}...")
 
+    # Criação do ficheiro de registo de clientes
     client_registry = client_registry.Clients()
 
     # Início da contagem do tempo de execução do agente

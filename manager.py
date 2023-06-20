@@ -31,20 +31,25 @@ if __name__ == "__main__":
     if len(sys.argv) < 5:
         print("Use format: python manager.py [password] [get/set] [request-id] [version-numbers] [new-value]")
     else:
+
+        # Atribuição dos argumentos às respetivas variáveis
         password = sys.argv[1]
         action = sys.argv[2]
         request_id = sys.argv[3]
         version_numbers = sys.argv[4]
-        version_numbers = comm_utils.parse_version_numbers(version_numbers)
+        version_numbers = comm_utils.parse_version_numbers(version_numbers) #Strings do tipo "1.2.3" passarão a ser [1,2,3]
 
         if action == "get":
             primitive_type = 1
         elif action == "set":
-            #Quando é para criar uma entrada na MIB, a primitiva set permite que não hava novo elemento a adicionar deste que ultimo OID seja 0
+            #Quando é para criar uma entrada na MIB, 
+            #a primitiva set permite que não haja novo elemento a adicionar deste que ultimo OID seja 0
             if len(version_numbers) > 0 and version_numbers[-1] == 0 and len(sys.argv) < 6: 
+                #Pedido de geração de chave
                 new_value = None
                 primitive_type = 2
             else:
+                #Pedido de set com um determinado valor
                 if len(sys.argv) < 6:
                     print("Missing new_value argument for SET command")
                     sys.exit(0)
@@ -70,5 +75,3 @@ if __name__ == "__main__":
     data, addr = sock.recvfrom(mn.BUFFER_SIZE)
     pdu_received = pdu.PDU.decode(data)
     pdu_received.to_string()
-    #print(f"Resposta de {addr}: \"{pdu_received.to_string()}\"")  # Imprime a mensagem recebida do agente
-

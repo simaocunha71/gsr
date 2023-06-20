@@ -1,37 +1,18 @@
 {
     "password": {
+        "client_id": "1",
         "client_ip": "127.0.0.1",
         "client_port": 2048,
         "password": "password",
         "requests": [
-            [
-                "1",
-                5
-            ],
-            [
-                "1",
-                7
-            ],
-            [
-                "1",
-                9
-            ],
-            [
-                "1",
-                11
-            ],
-            [
-                "1",
-                12
-            ],
-            [
-                "1",
-                15
-            ],
-            [
-                "1",
-                24
-            ]
+            {
+                "request_id": "11",
+                "timestamp": 14
+            },
+            {
+                "request_id": "11",
+                "timestamp": 14
+            }
         ]
     }
 }

@@ -1,6 +1,8 @@
 import MIB.table as table
 import MIB.object as obj
 
+"""Módulo que representa o grupo data da MIB"""
+
 class MIB_Keys:
     
     def __init__(self):
@@ -26,16 +28,20 @@ class MIB_Keys:
         ])
 
     def get_table(self):
+        """Função que devolve a tabela da MIB e incrementa o número de chaves que lá se encontram
+        - esta função só será chamada para adicionar entradas na tabela"""
         self.update_n_valid_keys(self.objects)
         return self.dataTableGeneratedKeys
     
     def update_n_valid_keys(self, objects):
+        """Função que incrementa o número de chaves da tabela (i.e. incrementa a variável da classe dataTableGeneratedKeys responsável por contar chaves)
+        e atualiza a variavel responsável por isso neste módulo """
         new_val = self.dataTableGeneratedKeys.dataNumberOfValidKeys + 1
         return objects[0].set_value(new_val) 
     
     
     def to_string(self):
-        #print(len(self.objects))
+        """Função que imprime o grupo data + tabela"""
         for mib_obj in self.objects:
             mib_obj.to_string()
         self.dataTableGeneratedKeys.to_string()

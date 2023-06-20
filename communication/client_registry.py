@@ -64,39 +64,51 @@ class Clients:
         """Guarda uma entrada de Clients no ficheiro json"""
         data = {}
         for client_password, client in self.clients.items():
-            data[client_password] = {
+            client_data = {
+                'client_id': client.client_id,
                 'client_ip': client.client_ip,
                 'client_port': client.client_port,
                 'password': client.password,
-                'requests': client.requests
+                'requests': []
             }
+            for request in client.requests:
+                request_id, timestamp = request
+                client_data['requests'].append({
+                    'request_id': request_id,
+                    'timestamp': timestamp
+                })
+            data[client_password] = client_data
         with open("clients.json", 'w') as file:
             json.dump(data, file, indent=4)
 
+
     def can_send_same_requestID(self, client_password, request_id, max_time):
-        """Verifica se um cliente (aqui identificado pela sua password - não é a melhor abordagem) enviou um pedido com um dado request_id dentro de um intervalo max_time. 
-           Se sim retorna False caso contrario retorna True.
-        Além disso, faz a comparação com o timestamp do ultimo pedido com aquele request_id consecutivo (o cliente poderá enviar vários pedidos com aquele request_id 
-        indefinidamente desde que o intervalo entre pedidos não exceda max_time segundos). Se não existir aquele request_id na lista de pedidos daquele cliente,
-        o relógio levará reset"""
+        """Verifica se o pedido (identificado por request_id) do cliente (identificado por client_password) é enviado durante o intervalo
+        de tempo max_time. Caso ainda esteja dentro do intervalo, retorna falso, caso contrário, retorna true """
 
         # Cliente ainda não está registado
-        # Um cliente distingue-se pela assunção de que tem uma password única (mais nenhum cliente poderá utilizar aquela password) - limitação do projeto
+        # Um cliente é identificado pela sua senha única (nenhum outro cliente pode usar a mesma senha - não há controlo nesse aspeto) - limitação do projeto
         if client_password not in self.clients:
             return True 
 
         client = self.clients[client_password]
-        latest_timestamp = client.get_latest_timestamp(request_id)  
+
+        # Verifica se existe algum pedido com o mesmo request_id na lista de pedidos do cliente
+        has_previous_request = any(request[0] == request_id for request in client.requests)
 
         current_time = int(time.time()) - self.start_time
+
+        if not has_previous_request:
+            # Se não existir nenhum pedido anterior com o mesmo request_id, simplesmente adiciona o pedido à lista
+            client.requests = []
+            client.add_request(request_id, current_time)
+            return True
+
+        latest_timestamp = client.get_latest_timestamp(request_id)
         time_difference = current_time - latest_timestamp
 
-        # Reset ao relógio se o request_id for diferente do último registado
-        if request_id != client.requests[-1][0]:
-            current_time = int(time.time()) - self.start_time
-            time_difference = 0
+        return time_difference >= int(max_time)
 
-        return int(time_difference) < int(max_time)
 
 
 

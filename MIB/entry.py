@@ -65,12 +65,3 @@ class DataTableGeneratedKeysEntry:
                 f.set_value(value)
                 return
         raise ValueError("Não existe campo com índice {}".format(index))
-
-
-
-#d = DataTableGeneratedKeysEntry("mib.mib", 0)
-#d.to_string()
-#d.prettier_to_string()
-#field = d.get_field(1) #Value=0
-#field = d.get_field(6) #Value=None
-#field.to_string()
