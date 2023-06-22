@@ -35,7 +35,7 @@ def create_matrix_Zb(n, m2):
 
 
 def create_matrix_Zs(n, S):
-    """Devolve a matriz Zs (de tamanho n) com elementos aleatórios no intervalo [0, 255]"""
+    """Devolve a matriz Zs (de tamanho n) com elementos aleatórios no intervalo [33, 126]"""
     Zs = [[0 for i in range(n)] for j in range(n)]
     for i in range(n):
         for j in range(n):
