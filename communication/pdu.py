@@ -3,9 +3,9 @@ import pickle, sys
 
 class PDU:
     def __init__(self, request_id, primitive_type, instance_elements_size, instance_elements_list,
-                 error_elements_size, error_elements_list, security_level=0, n_security_parameters_number=0,
-                 n_security_parameters_list=[]):
-        self.security_level = security_level                             # Inteiro que identifica quais os mecanismos de segurança a utilizar (neste TP = 0)
+                 error_elements_size, error_elements_list,n_security_parameters_number,
+                 n_security_parameters_list, security_level=1):
+        self.security_level = security_level                             # Inteiro que identifica quais os mecanismos de segurança a utilizar (valor default = 1 - simboliza que utiliza segurança)
         self.n_security_parameters_number = n_security_parameters_number # Número de parâmetros necessários à implementação dos mecanismos de segurança (neste TP = 0)
         self.n_security_parameters_list = n_security_parameters_list     # Lista de parâmetros necessários à implementação dos mecanismos de segurança
         self.request_id = request_id                                     # ID do pedido
