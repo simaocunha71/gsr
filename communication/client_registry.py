@@ -2,13 +2,14 @@ import agent as agent
 import os
 import json
 import time
+import security.checksum as ch
+import security.encrypted_data as enc
 
-"""Classe responsável por criar uma entrada para um determinado cliente"""
 class Client_Registration:
-    def __init__(self, client_ip, client_port, client_id, password):
+    def __init__(self, client_id, client_ip, client_port, password):
+        self.client_id = client_id
         self.client_ip = client_ip
         self.client_port = client_port
-        self.client_id = client_id
         self.password = password
         self.requests = []
 
@@ -36,36 +37,35 @@ class Client_Registration:
         result += f"Password: {self.password}\n"
         print(result)
 
-"""Classe responsável por registar todas as entradas dos clientes conectados e regista-as num ficheiro json"""
 class Clients:
-    def __init__(self):
+    def __init__(self, filename, server_password):
         self.clients = {}
         self.start_time = int(time.time())
-        self.initialize_json_file()
+        self.initialize_json_file(filename, server_password)
 
-    def initialize_json_file(self):
+    def initialize_json_file(self, filename, server_password):
         """Cria o ficheiro "clients.json" quando é criado uma instância de Clients"""
-        if not os.path.exists("clients.json"):
-            with open("clients.json", 'w') as file:
+        if not os.path.exists(filename):
+            with open(filename, 'w') as file:
                 file.write("{}")
 
-    def add_client(self, client_ip, client_port, client_id, password):
+    def add_client(self, client_id, client_ip, client_port, request_id, password, filename, server_password):
         """Função que adiciona um cliente ao ficheiro json e ao dicionário"""
-        client = self.clients.get(password)
+        client = self.clients.get(client_id)
         if client:
             client.add_request(client_id, int(time.time()) - self.start_time)
         else:
-            client = Client_Registration(client_ip, client_port, client_id, password)
-            client.add_request(client_id, int(time.time()) - self.start_time)
-            self.clients[password] = client
-        self.save_to_json()
+            client = Client_Registration(client_id, client_ip, client_port, password)
+            client.add_request(request_id, int(time.time()) - self.start_time)
+            self.clients[client_id] = client
+        self.save_to_json(filename, server_password)
 
-    def save_to_json(self):
+    def save_to_json(self, filename, server_password):
+        """NOTE: server_password irá ser util para encriptar/desencriptar o ficheiro json"""
         """Guarda uma entrada de Clients no ficheiro json"""
         data = {}
-        for client_password, client in self.clients.items():
+        for client_id, client in self.clients.items():
             client_data = {
-                'client_id': client.client_id,
                 'client_ip': client.client_ip,
                 'client_port': client.client_port,
                 'password': client.password,
@@ -77,40 +77,22 @@ class Clients:
                     'request_id': request_id,
                     'timestamp': timestamp
                 })
-            data[client_password] = client_data
-        with open("clients.json", 'w') as file:
+            data[client_id] = client_data
+        with open(filename, 'w') as file:
             json.dump(data, file, indent=4)
 
-
-    def can_send_same_requestID(self, client_password, request_id, max_time):
-        """Verifica se o pedido (identificado por request_id) do cliente (identificado por client_password) é enviado durante o intervalo
+    def can_send_same_requestID(self, client_id, request_id, max_time):
+        """Verifica se o pedido (identificado por request_id) do cliente (identificado por client_id) é enviado durante o intervalo
         de tempo max_time. Caso ainda esteja dentro do intervalo, retorna falso, caso contrário, retorna true """
-
-        # Cliente ainda não está registado
-        # Um cliente é identificado pela sua senha única (nenhum outro cliente pode usar a mesma senha - não há controlo nesse aspeto) - limitação do projeto
-        if client_password not in self.clients:
-            return True 
-
-        client = self.clients[client_password]
-
-        # Verifica se existe algum pedido com o mesmo request_id na lista de pedidos do cliente
+        if client_id not in self.clients:
+            return True
+        client = self.clients[client_id]
         has_previous_request = any(request[0] == request_id for request in client.requests)
-
         current_time = int(time.time()) - self.start_time
-
         if not has_previous_request:
-            # Se não existir nenhum pedido anterior com o mesmo request_id, simplesmente adiciona o pedido à lista
             client.requests = []
             client.add_request(request_id, current_time)
             return True
-
         latest_timestamp = client.get_latest_timestamp(request_id)
         time_difference = current_time - latest_timestamp
-
         return time_difference >= int(max_time)
-
-
-
-
-
-

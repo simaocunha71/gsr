@@ -66,9 +66,9 @@ if __name__ == "__main__":
 
     mn = Manager()
 
-    #Calculo do checksum do cliente;
+    #Calculo do checksum do cliente usando a sua password
     password_from_server = "server_gsr"
-    checksum = checksum.get_checksum((client_id).encode(), password_from_server)
+    checksum = checksum.get_checksum((client_id).encode(), password)
 
     n_security_parameters_list = []
 
