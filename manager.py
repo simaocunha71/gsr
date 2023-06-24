@@ -92,8 +92,10 @@ if __name__ == "__main__":
     # Envia uma mensagem para o agente
     sock.sendto(pdu_to_send.encode(), (mn.AGENT_HOST, mn.AGENT_PORT))
     print(f"Message sent to {mn.AGENT_HOST}:{mn.AGENT_PORT}")
-
+    print("CHEGUEI AQUI1")
     # Espera pela resposta do agente
     data, addr = sock.recvfrom(mn.BUFFER_SIZE)
+    print("CHEGUEI AQUI2")
     pdu_received = pdu.PDU.decode(data)
+    print("CHEGUEI AQUI3")
     pdu_received.to_string()

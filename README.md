@@ -30,14 +30,15 @@ Relatório Overleaf: https://www.overleaf.com/project/64392ff091ff419dc81f0ab8
 * Erro #7: Primitiva efetuada não corresponde a get ou set
 * Erro #8: Número de OIDS incorretos
 * Erro #9: Manager não pode enviar o mesmo request id dentro de V segundos
-* Erro #10: Checksum mostra que cliente não é quem diz ser
+* Erro #10: Password inserida pelo cliente é diferente daquela que foi registada na primeira ligação ao servidor
+* Erro #11: Checksum mostra que cliente não é quem diz ser
 
 #### TODO para o TP2
 
 - Encriptar ficheiro de configuração e servidor so abre através de uma password
     -> Link util para encriptação em Python: https://www.geeksforgeeks.org/how-to-encrypt-and-decrypt-strings-in-python/
-- Impedir que o mesmo cliente se ligue ao servidor com duas passwords diferentes (verificar se realmente será preciso) - adicionar flag para alterar a sua password???
-- Verificar se a escrita no ficheiro json está a ser bem feita
+- ~~Impedir que o mesmo cliente se ligue ao servidor com duas passwords diferentes (verificar se realmente será preciso) - adicionar flag para alterar a sua password???~~
+- ~~Verificar se a escrita no ficheiro json está a ser bem feita~~
 - ~~Calcular checksum na PDU do cliente:~~
     ~~-> Link util para calcular checksum em Python: https://www.geeksforgeeks.org/implementing-checksum-using-python/~~
 - ~~Adicionar mais uma variavel na linha de comandos do cliente, onde essa variavel vai simbolizar o id do cliente (este id não precisa de ser um inteiro)~~

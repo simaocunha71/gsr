@@ -81,18 +81,22 @@ class Clients:
         with open(filename, 'w') as file:
             json.dump(data, file, indent=4)
 
-    def can_send_same_requestID(self, client_id, request_id, max_time):
+    def can_send_same_requestID(self, client_id, request_id, max_time, client_password):
         """Verifica se o pedido (identificado por request_id) do cliente (identificado por client_id) é enviado durante o intervalo
-        de tempo max_time. Caso ainda esteja dentro do intervalo, retorna falso, caso contrário, retorna true """
+        de tempo max_time. Caso ainda esteja dentro do intervalo, retorna falso, caso contrário, retorna true 
+        Além disso, o cliente terá de enviar a sua password igual à primeira que definiu"""
         if client_id not in self.clients:
             return True
         client = self.clients[client_id]
-        has_previous_request = any(request[0] == request_id for request in client.requests)
-        current_time = int(time.time()) - self.start_time
-        if not has_previous_request:
-            client.requests = []
-            client.add_request(request_id, current_time)
-            return True
-        latest_timestamp = client.get_latest_timestamp(request_id)
-        time_difference = current_time - latest_timestamp
-        return time_difference >= int(max_time)
+        if(client.client_id == client_password):
+            has_previous_request = any(request[0] == request_id for request in client.requests)
+            current_time = int(time.time()) - self.start_time
+            if not has_previous_request:
+                client.requests = []
+                client.add_request(request_id, current_time)
+                return True
+            latest_timestamp = client.get_latest_timestamp(request_id)
+            time_difference = current_time - latest_timestamp
+            return time_difference >= int(max_time)
+        else:
+            return False

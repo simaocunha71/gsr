@@ -120,11 +120,13 @@ class Agent:
         client_password = pdu_received.get_n_security_parameters_list()[1]
         client_checksum = pdu_received.get_n_security_parameters_list()[2]
 
+        #Valida o checksum recebido pelo cliente e compara com o checksum devidamente calculado
         if(is_valid_checksum(client_username, client_password, client_checksum) == True):
             
             #Verificação se o cliente que enviou um pedido enviou um request_id de um outro pedido seu há menos de max_store_time segundos
-            if(client_registry.can_send_same_requestID(client_username, pdu_received.get_request_id(), F.max_store_time) == True):
-                print("aqui")
+            #Além disso, o cliente terá de enviar a sua password igual à primeira que definiu
+            if(client_registry.can_send_same_requestID(client_username, pdu_received.get_request_id(), F.max_store_time, client_password) == True):
+
                 #Nesta fase, o cliente é válido e será registado ao ficheiro de clientes
                 client_registry.add_client(client_username, client_ip, F.port, pdu_received.get_request_id(), client_password, "clients.json", server_password)
 
@@ -288,8 +290,8 @@ class Agent:
                                     pdu_received.get_n_security_parameters_number(), 
                                    pdu_received.get_n_security_parameters_list()) 
             else:
-                """Erro #9: Manager não pode enviar o mesmo request id dentro de V segundos"""
-                send_error_PDU(pdu_received, "SAME REQUEST_ID SENT IN V SECONDS", sock, addr, primitive_type,
+                """Erro #9: Manager não pode enviar o mesmo request id dentro de V segundos ou a password inserida não é igual à primeira"""
+                send_error_PDU(pdu_received, "SAME REQUEST_ID SENT IN V SECONDS | WRONG PASSWORD", sock, addr, primitive_type,
                                 pdu_received.get_n_security_parameters_number(), 
                                pdu_received.get_n_security_parameters_list()) 
             mib.to_string()
