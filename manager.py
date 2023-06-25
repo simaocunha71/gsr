@@ -14,7 +14,7 @@ python .\manager.py username password set 1 3.2.6.0
 
 - para alterar valor:
 python .\manager.py username password set 4 2.1 42
-python .\manager.py username password set 7 3.2.4.2 nova_password       -> 7 é o ID do pedido e 4 é o ID da chave (cujo valor foi recebido aquando a criação de chave)
+python .\manager.py username password set 7 3.2.4.2 nova_palavra       -> 7 é o ID do pedido e 4 é o ID da chave (cujo valor foi recebido aquando a criação de chave)
 
 - para obter valor:
 python .\manager.py username password get 12 2.1
@@ -92,10 +92,8 @@ if __name__ == "__main__":
     # Envia uma mensagem para o agente
     sock.sendto(pdu_to_send.encode(), (mn.AGENT_HOST, mn.AGENT_PORT))
     print(f"Message sent to {mn.AGENT_HOST}:{mn.AGENT_PORT}")
-    print("CHEGUEI AQUI1")
+
     # Espera pela resposta do agente
     data, addr = sock.recvfrom(mn.BUFFER_SIZE)
-    print("CHEGUEI AQUI2")
     pdu_received = pdu.PDU.decode(data)
-    print("CHEGUEI AQUI3")
     pdu_received.to_string()

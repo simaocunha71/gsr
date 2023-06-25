@@ -102,7 +102,7 @@ class Agent:
         self.n_lock.release()
         return n_updated_times
     
-    def handle_request(self, sock, data, addr, F, mib, client_registry, server_password):
+    def handle_request(self, sock, data, addr, F, mib, client_registry):
         """Função que trata do pedido de um manager"""
 
         pdu_received = pdu.PDU.decode(data)
@@ -116,7 +116,7 @@ class Agent:
 
         #Obtenção do client_id/client_username, password e checksum enviados pelo cliente através do campo da PDU 
         client_username = pdu_received.get_n_security_parameters_list()[0]
-        client_username = enc.decrypt_string(client_username, server_password)
+        client_username = enc.decrypt_string(client_username, F.server_password)
         client_password = pdu_received.get_n_security_parameters_list()[1]
         client_checksum = pdu_received.get_n_security_parameters_list()[2]
 
@@ -128,7 +128,7 @@ class Agent:
             if(client_registry.can_send_same_requestID(client_username, pdu_received.get_request_id(), F.max_store_time, client_password) == True):
 
                 #Nesta fase, o cliente é válido e será registado ao ficheiro de clientes
-                client_registry.add_client(client_username, client_ip, F.port, pdu_received.get_request_id(), client_password, server_password)
+                client_registry.add_client(client_username, client_ip, F.port, pdu_received.get_request_id(), client_password, F.server_password)
 
                 #Não permitir que manager use lista de oids de tamanho maior que 4
                 if(pdu_received.get_instance_elements_size() <= 4): 
@@ -294,24 +294,22 @@ class Agent:
                 send_error_PDU(pdu_received, "SAME REQUEST_ID SENT IN V SECONDS | WRONG PASSWORD", sock, addr, primitive_type,
                                 pdu_received.get_n_security_parameters_number(), 
                                pdu_received.get_n_security_parameters_list()) 
-            mib.to_string()
         else:
             """Erro #10: Checksum mostra que cliente não é quem diz ser"""
             send_error_PDU(pdu_received, "WRONG CHECKSUM", sock, addr, primitive_type,
                            pdu_received.get_n_security_parameters_number(), 
                            pdu_received.get_n_security_parameters_list()) 
+        #mib.to_string()
 
 
 if __name__ == "__main__":
     print("----------Agent started----------")
-    # Verificar a senha fornecida na linha de comandos
-    server_password = "server_gsr"  # Password esperada
 
-    if len(sys.argv) == 3 and sys.argv[1] == server_password and sys.argv[2] == "-encrypt":
+    # Leitura do ficheiro
+    F = configurations.Configurations("config.conf") 
+    
+    if len(sys.argv) == 3 and sys.argv[1] == F.server_password and sys.argv[2] == "-encrypt":
         ag = Agent()
-
-        # Leitura do ficheiro
-        F = configurations.Configurations("config.conf") 
 
         # Povoa os grupos da MIB
         mib = fill_initially_MIB(F)
@@ -326,7 +324,7 @@ if __name__ == "__main__":
 
         enc.encrypt_file("clients.json", sys.argv[1])
         
-        client_registry = client_registry.Clients("clients.json", server_password)
+        client_registry = client_registry.Clients("clients.json", F.server_password)
 
         # Início da contagem do tempo de execução do agente
         ag.current_time = time.time()
@@ -335,10 +333,10 @@ if __name__ == "__main__":
         while True:
             data, addr = sock.recvfrom(ag.bufferSize)
             # Cria uma nova thread para tratar a mensagem recebida
-            t = threading.Thread(target=ag.handle_request, args=(sock, data, addr, F, mib, client_registry, server_password))
+            t = threading.Thread(target=ag.handle_request, args=(sock, data, addr, F, mib, client_registry))
             t.start()
-    elif len(sys.argv) == 3 and sys.argv[1] == server_password and sys.argv[2] == "-decrypt":
+    elif len(sys.argv) == 3 and sys.argv[1] == F.server_password and sys.argv[2] == "-decrypt":
         #Caso o agente queira desencriptar o ficheiro clients.json, poderá colocar a flag "-decrypt"
-        enc.decrypt_file("clients.json", server_password)
+        enc.decrypt_file("clients.json", F.server_password)
     else:
         print("Password inválida!")

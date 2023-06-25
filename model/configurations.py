@@ -11,6 +11,7 @@ class Configurations:
     regex_max_store_time  = r'V:\s*(\d+)'
     regex_n_max_entries   = r'X:\s*(\d+)'
     regex_port            = r'Port:\s*(\d+)'
+    regex_password        = r'Password:\s*(.+)'
 
     def __init__(self, filename):
         with open(filename, 'r') as f:
@@ -22,6 +23,7 @@ class Configurations:
         self.max_store_time = self.get_value(''.join(f_lines), self.regex_max_store_time)        # Tempo máximo do armazenamento da informação na matriz
         self.n_max_entries = int(self.get_value(''.join(f_lines), self.regex_n_max_entries))     # Número máximo de entradas na tabela
         self.port = int(self.get_value(''.join(f_lines), self.regex_port))                       # Porta de atendimento UDP
+        self.server_password = self.get_value(''.join(f_lines), self.regex_password)             # Password a ser utilizada pelo servidor
         self.min = 33                                                                            # Valor mínimo do código ASCII para a matriz fm
         self.max = 126                                                                           # Valor máximo do código ASCII para a matriz fm
         
@@ -54,6 +56,10 @@ class Configurations:
         """Devolve a porta de atendimento UDP"""
         return self.port
     
+    def get_server_password(self):
+        """Devolve a password do servidor"""
+        return self.server_password
+        
     def get_min(self):
         """Devolve o valor mínimo do código ASCII para a matriz fm"""
         return self.min
@@ -71,3 +77,4 @@ class Configurations:
         print(f"V: {self.max_store_time}")
         print(f"X: {str(self.n_max_entries)}")
         print(f"Port: {str(self.port)}")
+        print(f"Password: {str(self.server_password)}")

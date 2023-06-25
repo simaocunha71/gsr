@@ -56,8 +56,10 @@ class Clients:
         """Função que adiciona um cliente ao ficheiro json e ao dicionário"""
         client = self.clients.get(client_id)
         if client:
-            client.add_request(client_id, int(time.time()) - self.start_time)
+            #Caso o cliente já exista, simplesmente adiciona um novo pedido
+            client.add_request(request_id, int(time.time()) - self.start_time)
         else:
+            #Caso o cliente ainda não exista, adiciona um objeto Client_Registration com os devidos dados e de seguida adiciona ao dicionário de clientes
             client = Client_Registration(client_id, client_ip, client_port, password)
             client.add_request(request_id, int(time.time()) - self.start_time)
             self.clients[client_id] = client
@@ -95,7 +97,7 @@ class Clients:
         if client_id not in self.clients:
             return True
         client = self.clients[client_id]
-        if(client.client_id == client_password):
+        if(client.password == client_password):
             has_previous_request = any(request[0] == request_id for request in client.requests)
             current_time = int(time.time()) - self.start_time
             if not has_previous_request:
