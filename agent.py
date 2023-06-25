@@ -128,7 +128,7 @@ class Agent:
             if(client_registry.can_send_same_requestID(client_username, pdu_received.get_request_id(), F.max_store_time, client_password) == True):
 
                 #Nesta fase, o cliente é válido e será registado ao ficheiro de clientes
-                client_registry.add_client(client_username, client_ip, F.port, pdu_received.get_request_id(), client_password, "clients.json", server_password)
+                client_registry.add_client(client_username, client_ip, F.port, pdu_received.get_request_id(), client_password, server_password)
 
                 #Não permitir que manager use lista de oids de tamanho maior que 4
                 if(pdu_received.get_instance_elements_size() <= 4): 

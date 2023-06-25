@@ -6,7 +6,7 @@ from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 import base64
-import os
+import json
 
 def derive_key_from_password(password):
     """Função que deriva uma chave de 32 bytes a partir de uma senha"""
@@ -43,12 +43,21 @@ def decrypt_string(string, password):
     return decMessage
 
 def encrypt_file(file_path, password):
-    """TODO: Função que encripta um ficheiro usando uma password"""
-    print("TODO: encriptar o ficheiro!")
+    """Função que encripta um ficheiro usando uma password"""
+    json_data = {}
+    
+    encrypted_data = encrypt_string(json.dumps(json_data), password)
+    
+    with open(file_path, 'wb') as file:
+        file.write(encrypted_data)
 
 def decrypt_file(file_path, password):
-    """TODO: Função que desencripta um arquivo usando uma password"""
-    print("TODO: desencriptar o ficheiro!")
-
-
-#TODO: CORRIGIR AS FUNÇOES DE ENCRIPTAÇAO E DESENCRIPTAÇAO DE UM FICHEIRO (ENC.DESEC(FILE) = FILE)
+    """Função que desencripta um arquivo usando uma password"""
+    with open(file_path, 'rb') as file:
+        encrypted_data = file.read()
+    
+    decrypted_data = decrypt_string(encrypted_data, password)
+    json_data = json.loads(decrypted_data)
+    
+    with open(file_path, 'w') as file:
+        json.dump(json_data, file, indent=4)

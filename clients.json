@@ -1,12 +1,34 @@
 {
-    "username": {
+    "username1": {
         "client_ip": "127.0.0.1",
         "client_port": 2048,
-        "password": "ole",
+        "password": "password1",
         "requests": [
             {
                 "request_id": "200",
-                "timestamp": 4
+                "timestamp": 14
+            }
+        ]
+    },
+    "username2": {
+        "client_ip": "127.0.0.1",
+        "client_port": 2048,
+        "password": "password2",
+        "requests": [
+            {
+                "request_id": "200",
+                "timestamp": 24
+            }
+        ]
+    },
+    "username3": {
+        "client_ip": "127.0.0.1",
+        "client_port": 2048,
+        "password": "password3",
+        "requests": [
+            {
+                "request_id": "200",
+                "timestamp": 36
             }
         ]
     }

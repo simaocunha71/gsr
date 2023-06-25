@@ -2,9 +2,10 @@ import agent as agent
 import os
 import json
 import time
-import security.checksum as ch
 import security.encrypted_data as enc
 
+"""Classe que representa um registo de um cliente já ligado ao agente. Contém um ID escrito por si, IP e porta utilizados, uma password sua e uma lista de pedidos cujos
+elementos são do tipo (ID do pedido, timestamp em segundos desde que o agente foi iniciado)"""
 class Client_Registration:
     def __init__(self, client_id, client_ip, client_port, password):
         self.client_id = client_id
@@ -37,19 +38,21 @@ class Client_Registration:
         result += f"Password: {self.password}\n"
         print(result)
 
+"""Classe que contém um dicionário com todos os gestores alguma vez ligados ao agente. Também contém um ficheiro encriptado para facilitar a visualização do registo dos clientes"""
 class Clients:
     def __init__(self, filename, server_password):
         self.clients = {}
         self.start_time = int(time.time())
-        self.initialize_json_file(filename, server_password)
+        self.filename = filename
+        self.initialize_json_file(server_password)
 
-    def initialize_json_file(self, filename, server_password):
+    def initialize_json_file(self, server_password):
         """Cria o ficheiro "clients.json" quando é criado uma instância de Clients"""
-        if not os.path.exists(filename):
-            with open(filename, 'w') as file:
-                file.write("{}")
+        if not os.path.exists(self.filename):
+            with open(self.filename, 'w') as file:
+                file.write(enc.encrypt_file("{}", server_password))
 
-    def add_client(self, client_id, client_ip, client_port, request_id, password, filename, server_password):
+    def add_client(self, client_id, client_ip, client_port, request_id, password, server_password):
         """Função que adiciona um cliente ao ficheiro json e ao dicionário"""
         client = self.clients.get(client_id)
         if client:
@@ -58,10 +61,10 @@ class Clients:
             client = Client_Registration(client_id, client_ip, client_port, password)
             client.add_request(request_id, int(time.time()) - self.start_time)
             self.clients[client_id] = client
-        self.save_to_json(filename, server_password)
+        self.save_to_json(server_password)
 
-    def save_to_json(self, filename, server_password):
-        """NOTE: server_password irá ser util para encriptar/desencriptar o ficheiro json"""
+    def save_to_json(self, server_password):
+        """NOTE: server_password irá ser útil para encriptar/desencriptar o ficheiro json"""
         """Guarda uma entrada de Clients no ficheiro json"""
         data = {}
         for client_id, client in self.clients.items():
@@ -78,8 +81,12 @@ class Clients:
                     'timestamp': timestamp
                 })
             data[client_id] = client_data
-        with open(filename, 'w') as file:
-            json.dump(data, file, indent=4)
+
+        encrypted_data = enc.encrypt_string(json.dumps(data), server_password)
+
+        with open(self.filename, 'wb') as file:
+            file.write(encrypted_data)
+
 
     def can_send_same_requestID(self, client_id, request_id, max_time, client_password):
         """Verifica se o pedido (identificado por request_id) do cliente (identificado por client_id) é enviado durante o intervalo
