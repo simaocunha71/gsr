@@ -9,6 +9,7 @@ Relatório Overleaf: https://www.overleaf.com/project/64392ff091ff419dc81f0ab8
 * V: Tempo máximo do armazenamento da informação na matriz
 * X: Número máximo de entradas na tabela
 * Port: Porta de atendimento UDP
+* Password: Password a ser utilizada pelo cliente
 
 #### Estrutura do repositório
 * *config.conf*: Ficheiro de configuração
