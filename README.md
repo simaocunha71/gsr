@@ -1,6 +1,37 @@
 ### Repositório da UC de Gestão e Segurança de Redes - Ano letivo 2022/2023
 
-Relatório Overleaf: https://www.overleaf.com/project/64392ff091ff419dc81f0ab8
+### Bibliotecas a instalar
+```
+pip install cryptography
+```
+
+### Comandos de exemplo
+
+**Gestor/Cliente**:
+- para criar uma chave:
+```
+python .\manager.py username password set 1 3.2.6.0
+```
+- para alterar valor:
+```
+python .\manager.py username password set 4 2.1 42
+python .\manager.py username password set 7 3.2.4.2 nova_palavra  
+```
+- para obter valor:
+```
+python .\manager.py username password get 12 2.1
+```
+
+**Agente/Servidor**:
+- inicializar agente com ficheiro de registo de clientes encriptado:
+```
+python .\agent.py server_gsr -encrypt
+```
+
+- Agente apenas desencripta conteudo do ficheiro json com a password
+```
+python .\agent.py server_gsr -decrypt
+```
 
 #### Sintaxe do ficheiro de configuração
 * K: Número de linhas ou colunas da matriz
@@ -24,14 +55,13 @@ Relatório Overleaf: https://www.overleaf.com/project/64392ff091ff419dc81f0ab8
 * *docs/*: Documentos necessários para o TP (enunciados, ...)
 
 #### Códigos de erro
-* Erro #1: Pedido de criação de chave mas MIB não suporta a adição de mais chaves
-* Erro #2: Grupo acedido da MIB não existe
-* Erro #3: Objeto não existe no grupo System ou Config
-* Erro #4: Entrada da MIB a aceder não existe
-* Erro #5: Campo da entrada acedida na tabela não existe
-* Erro #6: Valor a adicionar não é do mesmo tipo que o estipulado para o objeto
-* Erro #7: Primitiva efetuada não corresponde a get ou set
-* Erro #8: Número de OIDS incorretos
-* Erro #9: Manager não pode enviar o mesmo request id dentro de V segundos ou a password inserida não é igual à primeira
-* Erro #10: Password inserida pelo cliente é diferente daquela que foi registada na primeira ligação ao servidor
-* Erro #11: Checksum mostra que cliente não é quem diz ser
+- Erro #1 ("*MIB FULL*"): Pedido de criação de chave mas MIB não suporta a adição de mais chaves
+- Erro #2 ("*NON EXISTENT GROUP*"): Grupo acedido da MIB não existe
+- Erro #3 ("*NON EXISTENT VALUE (Sys/Conf)*"): Objeto não existe no grupo System ou Config
+- Erro #4 ("*NON EXISTENT ENTRY*"): Entrada da MIB a aceder não existe
+- Erro #5 ("*NON EXISTENT OBJECT IN ENTRY*"): Campo da entrada acedida na tabela não existe
+- Erro #6 ("*VALUE WITH DIFFERENT TYPE*"): Valor a adicionar não é do mesmo tipo que o estipulado para o objeto
+- Erro #7 ("*PRIMITIVE NOT SUPPORTED*"): Primitiva efetuada não corresponde a get ou
+- Erro #8 ("*OIDs len INCORRECT*"): Número de OIDS incorretos
+- Erro #9 ("*SAME REQUEST_ID SENT IN V SECONDS| WRONG PASSWORD*"): Manager não pode enviar o mesmo request id dentro de V segundos ou a password inserida não é igual à primeira
+- Erro #10 ("*WRONG CHECKSUM*"): Checksum mostra que cliente não é quem diz ser

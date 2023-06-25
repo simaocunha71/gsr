@@ -299,7 +299,7 @@ class Agent:
             send_error_PDU(pdu_received, "WRONG CHECKSUM", sock, addr, primitive_type,
                            pdu_received.get_n_security_parameters_number(), 
                            pdu_received.get_n_security_parameters_list()) 
-        #mib.to_string()
+        mib.to_string()
 
 
 if __name__ == "__main__":
