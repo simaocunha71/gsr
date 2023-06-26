@@ -1,5 +1,6 @@
 ### Repositório da UC de Gestão e Segurança de Redes - Ano letivo 2022/2023
 
+Relatório: [Aqui](https://github.com/simaocunha71/gsr/blob/main/docs/GSR_22_23_93262.pdf)
 ### Bibliotecas a instalar
 ```
 pip install cryptography
